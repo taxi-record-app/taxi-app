@@ -46,6 +46,11 @@
       height: 100%;
     }
 
+    /* 背景地図の色を落として、マークを見やすくする（マークには影響しない） */
+    #map .leaflet-tile-pane {
+      filter: grayscale(100%) brightness(1.08) contrast(0.88);
+    }
+
     /* ログイン表示 */
     #authBar {
       position: absolute;
@@ -286,18 +291,19 @@
 
       flex-direction: column;
       width: auto;
-      min-width: 50px;
-      padding: 0 16px;
+      height: 44px;
+      min-width: 44px;
+      padding: 0 13px;
 
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
-      line-height: 1.25;
+      line-height: 1.2;
 
-      border-radius: 25px;
+      border-radius: 22px;
     }
 
     #btnOnlyMine .only-state {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: normal;
     }
 
@@ -746,7 +752,7 @@
     type="button"
     title="自分の記録だけ表示"
   >
-    <span>🙋 自分のみ</span>
+    <span>自分のみ</span>
     <span class="only-state" id="onlyMineState">OFF</span>
   </button>
 
