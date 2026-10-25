@@ -255,9 +255,14 @@
       bottom: 250px;
     }
 
-    #btnGroup {
+    #btnFriends {
       right: 15px;
       bottom: 320px;
+    }
+
+    #btnOnlyMine {
+      bottom: 180px;
+      left: 15px;
     }
 
     #btnAmountMode {
@@ -268,7 +273,7 @@
     /* 金額の凡例 */
     #amountLegend {
       position: absolute;
-      bottom: 170px;
+      bottom: 240px;
       left: 15px;
       z-index: 1000;
 
@@ -471,6 +476,154 @@
       color: #666;
       font-size: 13px;
     }
+
+    /* 曜日ボタン */
+    #dayRow {
+      display: flex;
+      gap: 3px;
+
+      margin-top: 6px;
+    }
+
+    #dayRow .day-btn {
+      flex: 1;
+
+      padding: 5px 0;
+
+      font-size: 13px;
+
+      background: #f1f1f1;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #dayRow .day-btn.sat {
+      color: #1565c0;
+    }
+
+    #dayRow .day-btn.sun {
+      color: #c62828;
+    }
+
+    #dayRow .day-btn.selected {
+      color: #fff;
+      font-weight: bold;
+
+      background: #2196f3;
+      border-color: #2196f3;
+    }
+
+    /* フレンド申請のお知らせ */
+    .btn.badge::after {
+      content: "";
+
+      position: absolute;
+      top: 2px;
+      right: 2px;
+
+      width: 13px;
+      height: 13px;
+
+      background: #e53935;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* フレンド画面 */
+    .code-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      margin-top: 4px;
+    }
+
+    .code-text {
+      flex: 1;
+
+      font-family: monospace;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .inline-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inline-row input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .small-btn {
+      padding: 8px 10px;
+
+      font-size: 13px;
+      white-space: nowrap;
+
+      border: none;
+      border-radius: 6px;
+
+      cursor: pointer;
+    }
+
+    .friend-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      padding: 8px 0;
+
+      font-size: 14px;
+
+      border-bottom: 1px solid #eee;
+    }
+
+    .friend-dot {
+      flex-shrink: 0;
+      width: 12px;
+      height: 12px;
+
+      border-radius: 50%;
+    }
+
+    .friend-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .friend-row label {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+
+      margin: 0;
+
+      font-size: 13px;
+    }
+
+    .friend-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .friend-empty {
+      margin: 8px 0 0;
+
+      color: #666;
+      font-size: 13px;
+    }
+
+    .section-title {
+      margin-top: 16px;
+    }
   </style>
 </head>
 
@@ -504,6 +657,17 @@
       step="5"
       value="720"
     >
+
+    <div id="dayRow">
+      <button type="button" class="day-btn selected" data-day="all">全</button>
+      <button type="button" class="day-btn" data-day="1">月</button>
+      <button type="button" class="day-btn" data-day="2">火</button>
+      <button type="button" class="day-btn" data-day="3">水</button>
+      <button type="button" class="day-btn" data-day="4">木</button>
+      <button type="button" class="day-btn" data-day="5">金</button>
+      <button type="button" class="day-btn sat" data-day="6">土</button>
+      <button type="button" class="day-btn sun" data-day="0">日</button>
+    </div>
   </div>
 
   <div id="map"></div>
@@ -524,12 +688,21 @@
   <div id="amountLegend"></div>
 
   <button
-    id="btnGroup"
+    id="btnFriends"
     class="btn"
     type="button"
-    title="グループ"
+    title="フレンド"
   >
     👥
+  </button>
+
+  <button
+    id="btnOnlyMine"
+    class="btn"
+    type="button"
+    title="自分の記録だけ表示"
+  >
+    🙋
   </button>
 
   <button
@@ -670,7 +843,7 @@
         step="1"
       >
 
-      <label for="settingDisplayName">グループで表示する名前</label>
+      <label for="settingDisplayName">フレンドに表示する名前</label>
       <input
         type="text"
         id="settingDisplayName"
@@ -691,104 +864,74 @@
     </div>
   </div>
 
-  <!-- グループモーダル -->
-  <div id="groupModal" class="modal-overlay">
+  <!-- フレンドモーダル -->
+  <div id="friendModal" class="modal-overlay">
     <div class="modal-box">
-      <h3>グループ</h3>
+      <h3>フレンド</h3>
 
-      <p id="groupLoginNote" class="modal-note" style="display: none;">
-        グループを使うには、画面上部の「Googleでログイン」が必要です。
+      <p id="friendLoginNote" class="modal-note" style="display: none;">
+        フレンド機能を使うには、画面上部の「Googleでログイン」が必要です。
       </p>
 
-      <!-- 未参加のとき -->
-      <div id="groupNotJoinedArea">
-        <div class="choice-group">
-          <div class="choice-btn selected" id="tabGroupJoin">参加する</div>
-          <div class="choice-btn" id="tabGroupCreate">新しく作る</div>
-        </div>
+      <div id="friendBody">
+        <label>あなたの個人ID</label>
 
-        <!-- 参加 -->
-        <div id="groupJoinForm">
-          <label for="joinPassword">グループのパスワード</label>
-          <input
-            type="password"
-            id="joinPassword"
-            autocomplete="off"
-            placeholder="教えてもらったパスワード"
+        <div class="code-row">
+          <span class="code-text" id="myCodeText">取得中…</span>
+
+          <button
+            class="small-btn btn-save"
+            id="btnCopyCode"
+            type="button"
           >
-
-          <div class="modal-actions">
-            <button class="btn-save" id="btnGroupJoin" type="button">
-              参加する
-            </button>
-
-            <button class="btn-cancel" id="btnGroupCloseA" type="button">
-              閉じる
-            </button>
-          </div>
-        </div>
-
-        <!-- 作成 -->
-        <div id="groupCreateForm" style="display: none;">
-          <label for="createName">グループ名</label>
-          <input
-            type="text"
-            id="createName"
-            autocomplete="off"
-            maxlength="30"
-            placeholder="例：〇〇交通 仲間"
-          >
-
-          <label for="createPassword">パスワード（6文字以上）</label>
-          <input
-            type="password"
-            id="createPassword"
-            autocomplete="new-password"
-          >
-
-          <label for="createPassword2">パスワード（確認）</label>
-          <input
-            type="password"
-            id="createPassword2"
-            autocomplete="new-password"
-          >
-
-          <div class="modal-actions">
-            <button class="btn-save" id="btnGroupCreate" type="button">
-              作成する
-            </button>
-
-            <button class="btn-cancel" id="btnGroupCloseC" type="button">
-              閉じる
-            </button>
-          </div>
+            コピー
+          </button>
         </div>
 
         <p class="modal-note">
-          同じパスワードで参加した人どうしで、過去の記録が共有されます。
-          パスワードを知っている人は誰でも参加できるので、
-          推測されにくい長めのものにしてください。
-          記録した人の名前（設定画面で変更できます）もグループ内に表示されます。
+          このIDを教えた相手が、あなたにフレンド申請できます。
+          あなたが承認すると、お互いの過去の記録が見えるようになります。
+        </p>
+
+        <label for="friendCodeInput" class="section-title">
+          フレンドを追加（相手の個人ID）
+        </label>
+
+        <div class="inline-row">
+          <input
+            type="text"
+            id="friendCodeInput"
+            autocomplete="off"
+            autocapitalize="characters"
+            placeholder="例：ABCD-2345"
+          >
+
+          <button
+            class="small-btn btn-save"
+            id="btnFriendAdd"
+            type="button"
+          >
+            申請
+          </button>
+        </div>
+
+        <div id="friendIncomingArea" style="display: none;">
+          <label class="section-title">届いている申請</label>
+          <div id="friendIncomingList"></div>
+        </div>
+
+        <label class="section-title">フレンド一覧</label>
+        <div id="friendList"></div>
+
+        <p class="modal-note">
+          「表示」のチェックを外すと、そのフレンドの記録を地図に出しません。
         </p>
       </div>
 
-      <!-- 参加中のとき -->
-      <div id="groupJoinedArea" style="display: none;">
-        <p id="groupJoinedText"></p>
-
-        <p class="modal-note">
-          メンバーの記録は青い枠で表示されます。
-        </p>
-
-        <div class="modal-actions">
-          <button class="btn-danger" id="btnGroupLeave" type="button">
-            退出する
-          </button>
-
-          <button class="btn-cancel" id="btnGroupCloseB" type="button">
-            閉じる
-          </button>
-        </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btnFriendClose" type="button">
+          閉じる
+        </button>
       </div>
     </div>
   </div>
@@ -852,8 +995,32 @@
 
     const DRAFT_KEY = "taxi_draft";
     const VIEW_KEY = "taxi_view";
-    const GROUP_KEY = "taxi_group_id";
     const NAME_KEY = "taxi_display_name";
+    const FRIEND_VISIBLE_KEY = "taxi_friend_visible";
+    const ONLY_MINE_KEY = "taxi_only_mine";
+
+    /* 以前のグループ機能で保存していた値を片づける */
+    localStorage.removeItem("taxi_group_id");
+    localStorage.removeItem("taxi_group_name");
+
+    let filterDays = new Set();
+    let onlyMine = localStorage.getItem(ONLY_MINE_KEY) === "1";
+
+    let myProfile = null;
+    let friendships = [];
+    let friendNames = {};
+    let friendRecords = {};
+    let friendUnsubs = {};
+    let unsubscribeFriendships = null;
+    let friendErrorShown = false;
+    let friendVisible = {};
+
+    try {
+      friendVisible =
+        JSON.parse(localStorage.getItem(FRIEND_VISIBLE_KEY)) || {};
+    } catch (error) {
+      friendVisible = {};
+    }
 
     /*
      * ========================================
@@ -1356,10 +1523,6 @@
         if (auth.currentUser) {
           try {
             await saveToFirestore(record);
-
-            if (currentGroupId) {
-              await saveToGroup(record);
-            }
           } catch (error) {
             console.error(
               "Firestoreへの保存エラー:",
@@ -1409,10 +1572,6 @@
           .collection("records")
           .doc(documentId)
           .set(updated);
-
-        if (currentGroupId && groupIds.has(updated.id)) {
-          await saveToGroup(updated);
-        }
       } catch (error) {
         console.error("Firestoreの更新エラー:", error);
 
@@ -1499,162 +1658,71 @@
 
     /*
      * ========================================
-     * グループ（パスワード共有）
+     * フレンド
      *
-     * パスワードをSHA-256でハッシュ化した値をグループIDとして使い、
-     * groups/{グループID}/records に記録を保存します。
-     * 同じパスワードを入力した人は同じグループIDになるため、
-     * 記録を共有できます。
+     * ・個人ID（8文字）を相手に教えると、相手が申請できます。
+     * ・承認されると、お互いの過去の記録（users/{uid}/records）が
+     *   読めるようになります。
+     * ・解除すると、すぐに見えなくなります。
      * ========================================
      */
 
-    let currentGroupId = localStorage.getItem(GROUP_KEY) || null;
-    let groupRecords = [];
-    let groupIds = new Set();
-    let unsubscribeGroup = null;
+    const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-    async function hashPassword(password) {
-      const data = new TextEncoder().encode(
-        "taxi-record-app:v1:" + password
-      );
+    const FRIEND_COLORS = [
+      "#1565c0",
+      "#6a1b9a",
+      "#00838f",
+      "#ef6c00",
+      "#ad1457",
+      "#4e342e"
+    ];
 
-      const buffer = await crypto.subtle.digest("SHA-256", data);
+    function generateCode() {
+      const bytes = new Uint8Array(8);
+      crypto.getRandomValues(bytes);
 
-      return Array.from(new Uint8Array(buffer))
-        .map((byte) => byte.toString(16).padStart(2, "0"))
+      return Array.from(bytes)
+        .map((byte) => CODE_CHARS[byte % CODE_CHARS.length])
         .join("");
     }
 
-    function groupRecordsRef(groupId) {
-      return db
-        .collection("groups")
-        .doc(groupId)
-        .collection("records");
+    function formatCode(code) {
+      return code.slice(0, 4) + "-" + code.slice(4);
     }
 
-    async function saveToGroup(record) {
-      const user = auth.currentUser;
-
-      if (!user || !currentGroupId) {
-        return;
-      }
-
-      await groupRecordsRef(currentGroupId)
-        .doc(record.id)
-        .set({
-          ...cleanRecord(record),
-          uid: user.uid,
-          userName: getDisplayName()
-        });
+    function normalizeCode(text) {
+      return text.toUpperCase().replace(/[^A-Z0-9]/g, "");
     }
 
-    /* 名前を変えたとき、グループ内の自分の記録の名前も更新する */
-    async function updateNameInGroup(name) {
-      const user = auth.currentUser;
+    function friendColor(uid) {
+      let hash = 0;
 
-      if (!user || !currentGroupId) {
-        return;
+      for (const char of uid) {
+        hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
       }
 
-      const mine = groupRecords.filter((item) => {
-        return item.uid === user.uid;
-      });
-
-      for (let i = 0; i < mine.length; i += 400) {
-        const batch = db.batch();
-
-        mine.slice(i, i + 400).forEach((record) => {
-          batch.update(
-            groupRecordsRef(currentGroupId).doc(record.id),
-            { userName: name }
-          );
-        });
-
-        await batch.commit();
-      }
+      return FRIEND_COLORS[hash % FRIEND_COLORS.length];
     }
 
-    function stopGroupListener() {
-      if (unsubscribeGroup) {
-        unsubscribeGroup();
-        unsubscribeGroup = null;
-      }
+    function getFriendName(uid) {
+      return friendNames[uid] || "フレンド";
     }
 
-    function startGroupListener() {
-      stopGroupListener();
+    function isFriendVisible(uid) {
+      /* 追加した直後は表示状態（チェックを外した人だけ非表示） */
+      return friendVisible[uid] !== false;
+    }
 
-      if (!auth.currentUser || !currentGroupId) {
-        return;
-      }
-
-      unsubscribeGroup = groupRecordsRef(currentGroupId).onSnapshot(
-        (snapshot) => {
-          groupRecords = snapshot.docs.map((documentSnapshot) => {
-            const data = documentSnapshot.data();
-
-            return {
-              ...data,
-              id: data.id || documentSnapshot.id
-            };
-          });
-
-          groupIds = new Set(
-            groupRecords.map((item) => item.id)
-          );
-
-          renderMarkers();
-        },
-        (error) => {
-          console.error("グループの読み込みエラー:", error);
-
-          alert(
-            "グループの記録を読み込めませんでした。\n" +
-            error.message
-          );
-        }
+    function saveFriendVisible() {
+      localStorage.setItem(
+        FRIEND_VISIBLE_KEY,
+        JSON.stringify(friendVisible)
       );
     }
 
-    async function shareAllRecordsToGroup() {
-      const user = auth.currentUser;
-
-      if (!user || !currentGroupId) {
-        return;
-      }
-
-      for (let i = 0; i < records.length; i += 400) {
-        const batch = db.batch();
-
-        records.slice(i, i + 400).forEach((record) => {
-          batch.set(
-            groupRecordsRef(currentGroupId).doc(record.id),
-            {
-              ...cleanRecord(record),
-              uid: user.uid,
-              userName: getDisplayName()
-            }
-          );
-        });
-
-        await batch.commit();
-      }
-    }
-
-    const groupModal = document.getElementById("groupModal");
-    const btnGroup = document.getElementById("btnGroup");
-
-    const GROUP_NAME_KEY = "taxi_group_name";
-
-    let currentGroupName =
-      localStorage.getItem(GROUP_NAME_KEY) || "";
-
-    function groupDocRef(groupId) {
-      return db.collection("groups").doc(groupId);
-    }
-
-    function showGroupError(error) {
-      console.error("グループのエラー:", error);
+    function showFriendError(error) {
+      console.error("フレンド機能のエラー:", error);
 
       if (error.code === "permission-denied") {
         alert(
@@ -1667,257 +1735,664 @@
       }
 
       alert(
-        "グループの処理に失敗しました。\n" +
+        "フレンド機能の処理に失敗しました。\n" +
         error.message
       );
     }
 
-    function setGroupTab(tab) {
-      const isJoin = tab === "join";
+    /* 自分の個人IDと名前を用意する（初回だけ作成） */
+    async function ensureProfile(user) {
+      const profileRef = db.collection("profiles").doc(user.uid);
+      const snapshot = await profileRef.get();
 
-      document
-        .getElementById("tabGroupJoin")
-        .classList.toggle("selected", isJoin);
+      const desiredName = (
+        localStorage.getItem(NAME_KEY) ||
+        user.displayName ||
+        "ユーザー"
+      ).slice(0, 40);
 
-      document
-        .getElementById("tabGroupCreate")
-        .classList.toggle("selected", !isJoin);
+      if (snapshot.exists) {
+        myProfile = snapshot.data();
 
-      document.getElementById("groupJoinForm").style.display =
-        isJoin ? "block" : "none";
+        if (myProfile.name !== desiredName) {
+          await profileRef.update({ name: desiredName });
+          myProfile.name = desiredName;
+        }
 
-      document.getElementById("groupCreateForm").style.display =
-        isJoin ? "none" : "block";
-    }
+        return;
+      }
 
-    function updateGroupUI() {
-      const joined = Boolean(currentGroupId);
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const code = generateCode();
 
-      btnGroup.classList.toggle("active", joined);
+        try {
+          await db.runTransaction(async (transaction) => {
+            const codeRef = db.collection("codes").doc(code);
+            const codeSnapshot = await transaction.get(codeRef);
 
-      document.getElementById("groupNotJoinedArea").style.display =
-        joined ? "none" : "block";
+            if (codeSnapshot.exists) {
+              throw new Error("code-exists");
+            }
 
-      document.getElementById("groupJoinedArea").style.display =
-        joined ? "block" : "none";
-
-      document.getElementById("groupJoinedText").textContent =
-        currentGroupName
-          ? `グループ「${currentGroupName}」に参加中です。`
-          : "グループに参加中です。";
-
-      document.getElementById("groupLoginNote").style.display =
-        auth.currentUser ? "none" : "block";
-    }
-
-    document
-      .getElementById("tabGroupJoin")
-      .addEventListener("click", () => setGroupTab("join"));
-
-    document
-      .getElementById("tabGroupCreate")
-      .addEventListener("click", () => setGroupTab("create"));
-
-    btnGroup.addEventListener("click", () => {
-      document.getElementById("joinPassword").value = "";
-      document.getElementById("createName").value = "";
-      document.getElementById("createPassword").value = "";
-      document.getElementById("createPassword2").value = "";
-
-      setGroupTab("join");
-      updateGroupUI();
-
-      groupModal.style.display = "flex";
-    });
-
-    ["btnGroupCloseA", "btnGroupCloseB", "btnGroupCloseC"]
-      .forEach((id) => {
-        document
-          .getElementById(id)
-          .addEventListener("click", () => {
-            groupModal.style.display = "none";
+            transaction.set(codeRef, { uid: user.uid });
+            transaction.set(profileRef, {
+              code,
+              name: desiredName
+            });
           });
+
+          myProfile = { code, name: desiredName };
+
+          return;
+        } catch (error) {
+          if (error.message !== "code-exists") {
+            throw error;
+          }
+        }
+      }
+
+      throw new Error("個人IDを作成できませんでした。");
+    }
+
+    async function updateMyProfileName() {
+      const user = auth.currentUser;
+
+      if (!user || !myProfile) {
+        return;
+      }
+
+      const name = (
+        localStorage.getItem(NAME_KEY) ||
+        user.displayName ||
+        "ユーザー"
+      ).slice(0, 40);
+
+      await db
+        .collection("profiles")
+        .doc(user.uid)
+        .update({ name });
+
+      myProfile.name = name;
+    }
+
+    async function loadFriendNames(force) {
+      const uids = friendships
+        .map((item) => item.otherUid)
+        .filter((uid) => force || !(uid in friendNames));
+
+      await Promise.all(
+        uids.map(async (uid) => {
+          try {
+            const snapshot = await db
+              .collection("profiles")
+              .doc(uid)
+              .get();
+
+            friendNames[uid] =
+              (snapshot.exists && snapshot.data().name) ||
+              "フレンド";
+          } catch (error) {
+            console.error("フレンド名の取得エラー:", error);
+
+            if (!(uid in friendNames)) {
+              friendNames[uid] = "フレンド";
+            }
+          }
+        })
+      );
+    }
+
+    /* 表示がオンのフレンドの記録だけを読み込む */
+    function syncFriendListeners() {
+      const wanted = new Set(
+        friendships
+          .filter((item) => {
+            return (
+              item.status === "accepted" &&
+              isFriendVisible(item.otherUid)
+            );
+          })
+          .map((item) => item.otherUid)
+      );
+
+      Object.keys(friendUnsubs).forEach((uid) => {
+        if (!wanted.has(uid)) {
+          friendUnsubs[uid]();
+
+          delete friendUnsubs[uid];
+          delete friendRecords[uid];
+        }
       });
 
-    /* グループに入り、必要なら自分の過去の記録を共有する */
-    async function enterGroup(groupId, groupName) {
-      currentGroupId = groupId;
-      currentGroupName = groupName;
-
-      localStorage.setItem(GROUP_KEY, groupId);
-      localStorage.setItem(GROUP_NAME_KEY, groupName);
-
-      startGroupListener();
-
-      updateGroupUI();
-      groupModal.style.display = "none";
-
-      if (
-        records.length > 0 &&
-        confirm(
-          `自分の過去の記録（${records.length}件）も` +
-          "グループに共有しますか？"
-        )
-      ) {
-        try {
-          await shareAllRecordsToGroup();
-        } catch (error) {
-          showGroupError(error);
+      wanted.forEach((uid) => {
+        if (friendUnsubs[uid]) {
+          return;
         }
+
+        friendUnsubs[uid] = db
+          .collection("users")
+          .doc(uid)
+          .collection("records")
+          .onSnapshot(
+            (snapshot) => {
+              friendRecords[uid] = snapshot.docs.map(
+                (documentSnapshot) => {
+                  const data = documentSnapshot.data();
+
+                  return {
+                    ...data,
+                    id: data.id || documentSnapshot.id,
+                    uid
+                  };
+                }
+              );
+
+              renderMarkers();
+            },
+            (error) => {
+              console.error("フレンドの記録の読み込みエラー:", error);
+
+              delete friendRecords[uid];
+              renderMarkers();
+            }
+          );
+      });
+    }
+
+    function stopFriendshipsListener() {
+      if (unsubscribeFriendships) {
+        unsubscribeFriendships();
+        unsubscribeFriendships = null;
       }
     }
 
-    function validatePassword(password) {
-      if (password.length < 6) {
-        alert("パスワードは6文字以上で入力してください。");
-        return false;
+    function startFriendshipsListener() {
+      stopFriendshipsListener();
+
+      const user = auth.currentUser;
+
+      if (!user) {
+        return;
       }
 
-      return true;
+      unsubscribeFriendships = db
+        .collection("friendships")
+        .where("members", "array-contains", user.uid)
+        .onSnapshot(
+          async (snapshot) => {
+            friendships = snapshot.docs.map((documentSnapshot) => {
+              const data = documentSnapshot.data();
+
+              return {
+                id: documentSnapshot.id,
+                otherUid: data.members.find((uid) => {
+                  return uid !== user.uid;
+                }),
+                status: data.status,
+                requester: data.requester
+              };
+            });
+
+            syncFriendListeners();
+            renderFriendsUI();
+            renderMarkers();
+
+            await loadFriendNames(false);
+
+            renderFriendsUI();
+            renderMarkers();
+          },
+          (error) => {
+            console.error("フレンド一覧の読み込みエラー:", error);
+
+            if (!friendErrorShown) {
+              friendErrorShown = true;
+              showFriendError(error);
+            }
+          }
+        );
     }
 
-    /* 参加：すでにあるグループにパスワードで入る */
-    document
-      .getElementById("btnGroupJoin")
-      .addEventListener("click", async () => {
-        if (!auth.currentUser) {
-          alert("グループに参加するにはGoogleログインが必要です。");
-          return;
+    async function initFriends(user) {
+      friendErrorShown = false;
+
+      try {
+        await ensureProfile(user);
+      } catch (error) {
+        if (!friendErrorShown) {
+          friendErrorShown = true;
+          showFriendError(error);
         }
+      }
 
-        const password = document
-          .getElementById("joinPassword")
-          .value.trim();
+      startFriendshipsListener();
+      renderFriendsUI();
+    }
 
-        if (!validatePassword(password)) {
-          return;
-        }
+    function resetFriends() {
+      stopFriendshipsListener();
 
-        try {
-          const groupId = await hashPassword(password);
-          const snapshot = await groupDocRef(groupId).get();
-
-          if (!snapshot.exists) {
-            alert(
-              "このパスワードのグループが見つかりません。\n" +
-              "パスワードを確認するか、「新しく作る」から" +
-              "グループを作成してください。"
-            );
-            return;
-          }
-
-          await enterGroup(groupId, snapshot.data().name || "");
-        } catch (error) {
-          showGroupError(error);
-        }
+      Object.values(friendUnsubs).forEach((unsubscribe) => {
+        unsubscribe();
       });
 
-    /* 作成：グループ名とパスワードで新しいグループを作る */
-    document
-      .getElementById("btnGroupCreate")
-      .addEventListener("click", async () => {
-        const user = auth.currentUser;
+      friendUnsubs = {};
+      friendRecords = {};
+      friendships = [];
+      friendNames = {};
+      myProfile = null;
 
-        if (!user) {
-          alert("グループを作成するにはGoogleログインが必要です。");
-          return;
-        }
+      renderFriendsUI();
+    }
 
-        const name = document
-          .getElementById("createName")
-          .value.trim();
+    /* ---------- フレンド画面 ---------- */
 
-        const password = document
-          .getElementById("createPassword")
-          .value.trim();
+    const friendModal = document.getElementById("friendModal");
+    const btnFriends = document.getElementById("btnFriends");
 
-        const password2 = document
-          .getElementById("createPassword2")
-          .value.trim();
+    function makeSmallButton(text, className, onClick) {
+      const button = document.createElement("button");
 
-        if (!name) {
-          alert("グループ名を入力してください。");
-          return;
-        }
+      button.type = "button";
+      button.className = `small-btn ${className}`;
+      button.textContent = text;
 
-        if (!validatePassword(password)) {
-          return;
-        }
+      button.addEventListener("click", onClick);
 
-        if (password !== password2) {
-          alert("パスワードが一致しません。");
-          return;
-        }
+      return button;
+    }
 
-        try {
-          const groupId = await hashPassword(password);
-          const snapshot = await groupDocRef(groupId).get();
+    function makeFriendRow(uid, color) {
+      const row = document.createElement("div");
+      row.className = "friend-row";
 
-          if (snapshot.exists) {
-            alert(
-              "このパスワードはすでに使われています。\n" +
-              "別のパスワードにしてください。"
+      const dot = document.createElement("span");
+      dot.className = "friend-dot";
+      dot.style.background = color;
+
+      const name = document.createElement("span");
+      name.className = "friend-name";
+      name.textContent = getFriendName(uid);
+
+      row.appendChild(dot);
+      row.appendChild(name);
+
+      return row;
+    }
+
+    async function acceptRequest(item) {
+      await db
+        .collection("friendships")
+        .doc(item.id)
+        .update({ status: "accepted" });
+    }
+
+    async function removeFriendship(item) {
+      await db
+        .collection("friendships")
+        .doc(item.id)
+        .delete();
+
+      delete friendVisible[item.otherUid];
+      saveFriendVisible();
+    }
+
+    function renderFriendsUI() {
+      const user = auth.currentUser;
+
+      document.getElementById("friendLoginNote").style.display =
+        user ? "none" : "block";
+
+      document.getElementById("friendBody").style.display =
+        user ? "block" : "none";
+
+      document.getElementById("myCodeText").textContent =
+        myProfile ? formatCode(myProfile.code) : "取得中…";
+
+      const incomingArea =
+        document.getElementById("friendIncomingArea");
+
+      const incomingList =
+        document.getElementById("friendIncomingList");
+
+      const friendList = document.getElementById("friendList");
+
+      incomingList.textContent = "";
+      friendList.textContent = "";
+
+      if (!user) {
+        incomingArea.style.display = "none";
+        btnFriends.classList.remove("badge");
+        return;
+      }
+
+      /* 届いている申請 */
+      const incoming = friendships.filter((item) => {
+        return (
+          item.status === "pending" &&
+          item.requester !== user.uid
+        );
+      });
+
+      incomingArea.style.display =
+        incoming.length > 0 ? "block" : "none";
+
+      btnFriends.classList.toggle("badge", incoming.length > 0);
+
+      incoming.forEach((item) => {
+        const row = makeFriendRow(item.otherUid, "#999");
+
+        row.appendChild(
+          makeSmallButton("承認", "btn-save", async () => {
+            try {
+              await acceptRequest(item);
+            } catch (error) {
+              showFriendError(error);
+            }
+          })
+        );
+
+        row.appendChild(
+          makeSmallButton("拒否", "btn-cancel", async () => {
+            try {
+              await removeFriendship(item);
+            } catch (error) {
+              showFriendError(error);
+            }
+          })
+        );
+
+        incomingList.appendChild(row);
+      });
+
+      /* フレンド一覧（承認済み + 自分が送った申請） */
+      const accepted = friendships.filter((item) => {
+        return item.status === "accepted";
+      });
+
+      const sent = friendships.filter((item) => {
+        return (
+          item.status === "pending" &&
+          item.requester === user.uid
+        );
+      });
+
+      if (accepted.length === 0 && sent.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "friend-empty";
+        empty.textContent = "まだフレンドがいません。";
+        friendList.appendChild(empty);
+      }
+
+      accepted.forEach((item) => {
+        const row = makeFriendRow(
+          item.otherUid,
+          friendColor(item.otherUid)
+        );
+
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+
+        checkbox.type = "checkbox";
+        checkbox.checked = isFriendVisible(item.otherUid);
+
+        checkbox.addEventListener("change", () => {
+          friendVisible[item.otherUid] = checkbox.checked;
+          saveFriendVisible();
+
+          syncFriendListeners();
+          renderMarkers();
+        });
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode("表示"));
+
+        row.appendChild(label);
+
+        row.appendChild(
+          makeSmallButton("解除", "btn-danger", async () => {
+            const ok = confirm(
+              `${getFriendName(item.otherUid)}さんをフレンドから外しますか？\n` +
+              "お互いの記録が見えなくなります。"
             );
+
+            if (!ok) {
+              return;
+            }
+
+            try {
+              await removeFriendship(item);
+            } catch (error) {
+              showFriendError(error);
+            }
+          })
+        );
+
+        friendList.appendChild(row);
+      });
+
+      sent.forEach((item) => {
+        const row = makeFriendRow(item.otherUid, "#999");
+
+        const state = document.createElement("span");
+        state.textContent = "承認待ち";
+        state.style.fontSize = "12px";
+        state.style.color = "#666";
+
+        row.appendChild(state);
+
+        row.appendChild(
+          makeSmallButton("取消", "btn-cancel", async () => {
+            try {
+              await removeFriendship(item);
+            } catch (error) {
+              showFriendError(error);
+            }
+          })
+        );
+
+        friendList.appendChild(row);
+      });
+    }
+
+    async function addFriendByCode() {
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert("フレンド機能を使うにはGoogleログインが必要です。");
+        return;
+      }
+
+      const input = document.getElementById("friendCodeInput");
+      const code = normalizeCode(input.value);
+
+      if (code.length !== 8) {
+        alert("個人IDは8文字です。（例：ABCD-2345）");
+        return;
+      }
+
+      try {
+        const snapshot = await db
+          .collection("codes")
+          .doc(code)
+          .get();
+
+        if (!snapshot.exists) {
+          alert("この個人IDは見つかりません。入力を確認してください。");
+          return;
+        }
+
+        const otherUid = snapshot.data().uid;
+
+        if (otherUid === user.uid) {
+          alert("これはあなた自身の個人IDです。");
+          return;
+        }
+
+        const existing = friendships.find((item) => {
+          return item.otherUid === otherUid;
+        });
+
+        if (existing) {
+          if (existing.status === "accepted") {
+            alert("すでにフレンドです。");
             return;
           }
 
-          await groupDocRef(groupId).set({
-            name,
-            createdBy: user.uid,
+          if (existing.requester === user.uid) {
+            alert("すでに申請済みです。相手の承認をお待ちください。");
+            return;
+          }
+
+          /* 相手からの申請がすでにある場合は、そのまま承認する */
+          await acceptRequest(existing);
+
+          input.value = "";
+
+          alert("相手からの申請があったため、フレンドになりました。");
+
+          return;
+        }
+
+        const members = [user.uid, otherUid].sort();
+
+        await db
+          .collection("friendships")
+          .doc(members.join("_"))
+          .set({
+            members,
+            requester: user.uid,
+            status: "pending",
             createdAt:
               firebase.firestore.FieldValue.serverTimestamp()
           });
 
-          await enterGroup(groupId, name);
-        } catch (error) {
-          showGroupError(error);
-        }
+        input.value = "";
+
+        alert(
+          "フレンド申請を送りました。\n" +
+          "相手が承認すると、お互いの記録が見えるようになります。"
+        );
+      } catch (error) {
+        showFriendError(error);
+      }
+    }
+
+    btnFriends.addEventListener("click", () => {
+      renderFriendsUI();
+      friendModal.style.display = "flex";
+
+      /* 相手が名前を変えていた場合に備えて、開くたびに更新 */
+      loadFriendNames(true).then(() => {
+        renderFriendsUI();
+        renderMarkers();
+      });
+    });
+
+    document
+      .getElementById("btnFriendClose")
+      .addEventListener("click", () => {
+        friendModal.style.display = "none";
       });
 
     document
-      .getElementById("btnGroupLeave")
-      .addEventListener("click", () => {
-        const ok = confirm(
-          "グループから退出しますか？\n" +
-          "すでに共有した記録はグループに残ります。"
-        );
+      .getElementById("btnFriendAdd")
+      .addEventListener("click", addFriendByCode);
 
-        if (!ok) {
+    document
+      .getElementById("btnCopyCode")
+      .addEventListener("click", async () => {
+        if (!myProfile) {
           return;
         }
 
-        stopGroupListener();
-
-        currentGroupId = null;
-        currentGroupName = "";
-        groupRecords = [];
-        groupIds = new Set();
-
-        localStorage.removeItem(GROUP_KEY);
-        localStorage.removeItem(GROUP_NAME_KEY);
-
-        updateGroupUI();
-        renderMarkers();
-
-        groupModal.style.display = "none";
+        try {
+          await navigator.clipboard.writeText(myProfile.code);
+          alert("個人IDをコピーしました。");
+        } catch (error) {
+          alert(
+            "コピーできませんでした。\n" +
+            `個人ID：${formatCode(myProfile.code)}`
+          );
+        }
       });
 
-    /* 自分の記録とグループの記録を、idの重複なしでまとめる */
-    function getDisplayRecords() {
-      const merged = new Map();
+    /* ---------- 自分だけ表示 ---------- */
 
-      groupRecords.forEach((record) => {
-        merged.set(record.id, record);
-      });
+    const btnOnlyMine = document.getElementById("btnOnlyMine");
 
-      records.forEach((record) => {
-        merged.set(record.id, {
-          ...(merged.get(record.id) || {}),
-          ...record
+    function updateOnlyMineUI() {
+      btnOnlyMine.classList.toggle("active", onlyMine);
+
+      btnOnlyMine.title = onlyMine
+        ? "フレンドの記録も表示する"
+        : "自分の記録だけ表示";
+    }
+
+    btnOnlyMine.addEventListener("click", () => {
+      onlyMine = !onlyMine;
+
+      localStorage.setItem(ONLY_MINE_KEY, onlyMine ? "1" : "0");
+
+      updateOnlyMineUI();
+      renderMarkers();
+    });
+
+    /* ---------- 曜日フィルター ---------- */
+
+    function updateDayUI() {
+      document
+        .querySelectorAll("#dayRow .day-btn")
+        .forEach((button) => {
+          const day = button.dataset.day;
+
+          button.classList.toggle(
+            "selected",
+            day === "all"
+              ? filterDays.size === 0
+              : filterDays.has(Number(day))
+          );
+        });
+    }
+
+    document
+      .querySelectorAll("#dayRow .day-btn")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          const day = button.dataset.day;
+
+          if (day === "all") {
+            filterDays.clear();
+          } else if (filterDays.has(Number(day))) {
+            filterDays.delete(Number(day));
+          } else {
+            filterDays.add(Number(day));
+          }
+
+          updateDayUI();
+          renderMarkers();
         });
       });
 
-      return Array.from(merged.values());
+    /* 自分の記録 + 表示中のフレンドの記録 */
+    function getDisplayRecords() {
+      const result = [...records];
+
+      if (onlyMine) {
+        return result;
+      }
+
+      Object.keys(friendRecords).forEach((uid) => {
+        if (!isFriendVisible(uid)) {
+          return;
+        }
+
+        (friendRecords[uid] || []).forEach((record) => {
+          result.push(record);
+        });
+      });
+
+      return result;
     }
 
     /*
@@ -1968,8 +2443,10 @@
     }
 
     function createDivIcon(record) {
-      /* 自分の記録は白い枠、グループのメンバーの記録は青い枠 */
-      const borderColor = isOwnRecord(record) ? "#fff" : "#1565c0";
+      /* 自分の記録は白い枠、フレンドの記録はフレンドごとの色の枠 */
+      const borderColor = isOwnRecord(record)
+        ? "#fff"
+        : friendColor(record.uid);
 
       let html = "";
 
@@ -2042,9 +2519,12 @@
       legend.style.display = "block";
     }
 
-    /* スライダーの時刻の前後30分（日付は問わない）だけ表示 */
+    /*
+     * 曜日（複数選択可）と、スライダーの時刻の前後30分で絞り込む。
+     * どちらも未選択なら全部表示します。
+     */
     function passesFilter(record) {
-      if (filterMinute === null) {
+      if (filterMinute === null && filterDays.size === 0) {
         return true;
       }
 
@@ -2054,12 +2534,23 @@
         return false;
       }
 
-      const minute = date.getHours() * 60 + date.getMinutes();
+      if (
+        filterDays.size > 0 &&
+        !filterDays.has(date.getDay())
+      ) {
+        return false;
+      }
 
-      let diff = Math.abs(minute - filterMinute);
-      diff = Math.min(diff, 1440 - diff);
+      if (filterMinute !== null) {
+        const minute = date.getHours() * 60 + date.getMinutes();
 
-      return diff <= 30;
+        let diff = Math.abs(minute - filterMinute);
+        diff = Math.min(diff, 1440 - diff);
+
+        return diff <= 30;
+      }
+
+      return true;
     }
 
     function renderMarkers() {
@@ -2133,7 +2624,7 @@
         addDetailRow(
           body,
           "記録した人",
-          record.userName || "グループのメンバー"
+          getFriendName(record.uid)
         );
       }
 
@@ -2193,17 +2684,9 @@
         return item.id === record.id;
       });
 
-      const inGroup = groupIds.has(record.id);
-
       records = records.filter((item) => {
         return item.id !== record.id;
       });
-
-      groupRecords = groupRecords.filter((item) => {
-        return item.id !== record.id;
-      });
-
-      groupIds.delete(record.id);
 
       saveRecordsLocally();
       renderMarkers();
@@ -2228,12 +2711,6 @@
           .collection("records")
           .doc(documentId)
           .delete();
-
-        if (currentGroupId && inGroup) {
-          await groupRecordsRef(currentGroupId)
-            .doc(record.id)
-            .delete();
-        }
       } catch (error) {
         console.error(
           "Firestoreからの削除エラー:",
@@ -2378,9 +2855,7 @@
         }
 
         if (getDisplayName() !== oldName) {
-          updateNameInGroup(getDisplayName()).catch(
-            showGroupError
-          );
+          updateMyProfileName().catch(showFriendError);
         }
 
         settingsModal.style.display = "none";
@@ -2545,21 +3020,17 @@
 
         await loadRecordsFromFirestore();
 
-        startGroupListener();
+        initFriends(user);
       } else {
         loginButton.style.display = "inline-block";
         logoutButton.style.display = "none";
         userInfo.textContent = "";
 
-        stopGroupListener();
-        groupRecords = [];
-        groupIds = new Set();
+        resetFriends();
 
         records = loadLocalRecords();
         renderMarkers();
       }
-
-      updateGroupUI();
     });
 
     /*
@@ -2570,7 +3041,9 @@
     records = loadLocalRecords();
     renderMarkers();
     updateLegend();
-    updateGroupUI();
+    updateOnlyMineUI();
+    updateDayUI();
+    renderFriendsUI();
 
     /* 入力途中でページが再読み込みされていたら復元する */
     restoreDraft();
