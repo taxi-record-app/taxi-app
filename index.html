@@ -143,7 +143,73 @@
       display: block;
       box-sizing: border-box;
       width: 100%;
-      margin: 6px 0 0;
+      height: 22px;
+      margin: 0;
+
+      background: transparent;
+
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    #timeSlider::-webkit-slider-runnable-track {
+      height: 4px;
+      background: #bbb;
+      border-radius: 2px;
+    }
+
+    #timeSlider::-webkit-slider-thumb {
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+      margin-top: -6px;
+
+      background: #2196f3;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    #timeSlider::-moz-range-track {
+      height: 4px;
+      background: #bbb;
+      border-radius: 2px;
+    }
+
+    #timeSlider::-moz-range-thumb {
+      box-sizing: border-box;
+      width: 16px;
+      height: 16px;
+
+      background: #2196f3;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    /* スライダー上の 0〜23 の目盛り数字 */
+    #timeGuide {
+      position: relative;
+      height: 12px;
+      margin: 6px 8px 0;
+    }
+
+    #timeGuide span {
+      position: absolute;
+      top: 0;
+
+      color: #666;
+      font-size: 9px;
+      line-height: 12px;
+
+      transform: translateX(-50%);
+    }
+
+    #timeGuide span.major {
+      color: #000;
+      font-weight: bold;
     }
 
     .btn {
@@ -428,6 +494,8 @@
       <button id="btnTimeClear" type="button">解除</button>
     </div>
 
+    <div id="timeGuide"></div>
+
     <input
       type="range"
       id="timeSlider"
@@ -602,6 +670,15 @@
         step="1"
       >
 
+      <label for="settingDisplayName">グループで表示する名前</label>
+      <input
+        type="text"
+        id="settingDisplayName"
+        maxlength="20"
+        autocomplete="off"
+        placeholder="空欄ならGoogleの名前"
+      >
+
       <div class="modal-actions">
         <button class="btn-save" id="btnSaveSettings" type="button">
           保存
@@ -623,35 +700,85 @@
         グループを使うには、画面上部の「Googleでログイン」が必要です。
       </p>
 
-      <div id="groupJoinArea">
-        <label for="groupPassword">グループのパスワード</label>
-        <input
-          type="password"
-          id="groupPassword"
-          autocomplete="off"
-          placeholder="6文字以上"
-        >
+      <!-- 未参加のとき -->
+      <div id="groupNotJoinedArea">
+        <div class="choice-group">
+          <div class="choice-btn selected" id="tabGroupJoin">参加する</div>
+          <div class="choice-btn" id="tabGroupCreate">新しく作る</div>
+        </div>
+
+        <!-- 参加 -->
+        <div id="groupJoinForm">
+          <label for="joinPassword">グループのパスワード</label>
+          <input
+            type="password"
+            id="joinPassword"
+            autocomplete="off"
+            placeholder="教えてもらったパスワード"
+          >
+
+          <div class="modal-actions">
+            <button class="btn-save" id="btnGroupJoin" type="button">
+              参加する
+            </button>
+
+            <button class="btn-cancel" id="btnGroupCloseA" type="button">
+              閉じる
+            </button>
+          </div>
+        </div>
+
+        <!-- 作成 -->
+        <div id="groupCreateForm" style="display: none;">
+          <label for="createName">グループ名</label>
+          <input
+            type="text"
+            id="createName"
+            autocomplete="off"
+            maxlength="30"
+            placeholder="例：〇〇交通 仲間"
+          >
+
+          <label for="createPassword">パスワード（6文字以上）</label>
+          <input
+            type="password"
+            id="createPassword"
+            autocomplete="new-password"
+          >
+
+          <label for="createPassword2">パスワード（確認）</label>
+          <input
+            type="password"
+            id="createPassword2"
+            autocomplete="new-password"
+          >
+
+          <div class="modal-actions">
+            <button class="btn-save" id="btnGroupCreate" type="button">
+              作成する
+            </button>
+
+            <button class="btn-cancel" id="btnGroupCloseC" type="button">
+              閉じる
+            </button>
+          </div>
+        </div>
 
         <p class="modal-note">
-          同じパスワードを入力した人どうしで、過去の記録が共有されます。
+          同じパスワードで参加した人どうしで、過去の記録が共有されます。
           パスワードを知っている人は誰でも参加できるので、
           推測されにくい長めのものにしてください。
-          記録した人のGoogleアカウント名もグループ内に表示されます。
+          記録した人の名前（設定画面で変更できます）もグループ内に表示されます。
         </p>
-
-        <div class="modal-actions">
-          <button class="btn-save" id="btnGroupJoin" type="button">
-            参加する
-          </button>
-
-          <button class="btn-cancel" id="btnGroupCloseA" type="button">
-            閉じる
-          </button>
-        </div>
       </div>
 
+      <!-- 参加中のとき -->
       <div id="groupJoinedArea" style="display: none;">
-        <p>グループに参加中です。<br>メンバーの記録は青い枠で表示されます。</p>
+        <p id="groupJoinedText"></p>
+
+        <p class="modal-note">
+          メンバーの記録は青い枠で表示されます。
+        </p>
 
         <div class="modal-actions">
           <button class="btn-danger" id="btnGroupLeave" type="button">
@@ -726,6 +853,7 @@
     const DRAFT_KEY = "taxi_draft";
     const VIEW_KEY = "taxi_view";
     const GROUP_KEY = "taxi_group_id";
+    const NAME_KEY = "taxi_display_name";
 
     /*
      * ========================================
@@ -767,6 +895,17 @@
       localStorage.setItem(
         "taxi_settings",
         JSON.stringify(settings)
+      );
+    }
+
+    /* グループ内で表示する名前（未設定ならGoogleの名前） */
+    function getDisplayName() {
+      const user = auth.currentUser;
+
+      return (
+        localStorage.getItem(NAME_KEY) ||
+        (user && user.displayName) ||
+        ""
       );
     }
 
@@ -1405,8 +1544,34 @@
         .set({
           ...cleanRecord(record),
           uid: user.uid,
-          userName: user.displayName || ""
+          userName: getDisplayName()
         });
+    }
+
+    /* 名前を変えたとき、グループ内の自分の記録の名前も更新する */
+    async function updateNameInGroup(name) {
+      const user = auth.currentUser;
+
+      if (!user || !currentGroupId) {
+        return;
+      }
+
+      const mine = groupRecords.filter((item) => {
+        return item.uid === user.uid;
+      });
+
+      for (let i = 0; i < mine.length; i += 400) {
+        const batch = db.batch();
+
+        mine.slice(i, i + 400).forEach((record) => {
+          batch.update(
+            groupRecordsRef(currentGroupId).doc(record.id),
+            { userName: name }
+          );
+        });
+
+        await batch.commit();
+      }
     }
 
     function stopGroupListener() {
@@ -1467,7 +1632,7 @@
             {
               ...cleanRecord(record),
               uid: user.uid,
-              userName: user.displayName || ""
+              userName: getDisplayName()
             }
           );
         });
@@ -1479,33 +1644,139 @@
     const groupModal = document.getElementById("groupModal");
     const btnGroup = document.getElementById("btnGroup");
 
+    const GROUP_NAME_KEY = "taxi_group_name";
+
+    let currentGroupName =
+      localStorage.getItem(GROUP_NAME_KEY) || "";
+
+    function groupDocRef(groupId) {
+      return db.collection("groups").doc(groupId);
+    }
+
+    function showGroupError(error) {
+      console.error("グループのエラー:", error);
+
+      if (error.code === "permission-denied") {
+        alert(
+          "権限エラーです。\n" +
+          "Firestoreのルールがまだ更新されていない可能性があります。\n" +
+          "firestore.rules の内容をFirebaseコンソールの" +
+          "「ルール」に貼り付けて、公開してください。"
+        );
+        return;
+      }
+
+      alert(
+        "グループの処理に失敗しました。\n" +
+        error.message
+      );
+    }
+
+    function setGroupTab(tab) {
+      const isJoin = tab === "join";
+
+      document
+        .getElementById("tabGroupJoin")
+        .classList.toggle("selected", isJoin);
+
+      document
+        .getElementById("tabGroupCreate")
+        .classList.toggle("selected", !isJoin);
+
+      document.getElementById("groupJoinForm").style.display =
+        isJoin ? "block" : "none";
+
+      document.getElementById("groupCreateForm").style.display =
+        isJoin ? "none" : "block";
+    }
+
     function updateGroupUI() {
       const joined = Boolean(currentGroupId);
 
       btnGroup.classList.toggle("active", joined);
 
-      document.getElementById("groupJoinArea").style.display =
+      document.getElementById("groupNotJoinedArea").style.display =
         joined ? "none" : "block";
 
       document.getElementById("groupJoinedArea").style.display =
         joined ? "block" : "none";
 
+      document.getElementById("groupJoinedText").textContent =
+        currentGroupName
+          ? `グループ「${currentGroupName}」に参加中です。`
+          : "グループに参加中です。";
+
       document.getElementById("groupLoginNote").style.display =
         auth.currentUser ? "none" : "block";
     }
 
+    document
+      .getElementById("tabGroupJoin")
+      .addEventListener("click", () => setGroupTab("join"));
+
+    document
+      .getElementById("tabGroupCreate")
+      .addEventListener("click", () => setGroupTab("create"));
+
     btnGroup.addEventListener("click", () => {
-      document.getElementById("groupPassword").value = "";
+      document.getElementById("joinPassword").value = "";
+      document.getElementById("createName").value = "";
+      document.getElementById("createPassword").value = "";
+      document.getElementById("createPassword2").value = "";
+
+      setGroupTab("join");
       updateGroupUI();
+
       groupModal.style.display = "flex";
     });
 
-    ["btnGroupCloseA", "btnGroupCloseB"].forEach((id) => {
-      document.getElementById(id).addEventListener("click", () => {
-        groupModal.style.display = "none";
+    ["btnGroupCloseA", "btnGroupCloseB", "btnGroupCloseC"]
+      .forEach((id) => {
+        document
+          .getElementById(id)
+          .addEventListener("click", () => {
+            groupModal.style.display = "none";
+          });
       });
-    });
 
+    /* グループに入り、必要なら自分の過去の記録を共有する */
+    async function enterGroup(groupId, groupName) {
+      currentGroupId = groupId;
+      currentGroupName = groupName;
+
+      localStorage.setItem(GROUP_KEY, groupId);
+      localStorage.setItem(GROUP_NAME_KEY, groupName);
+
+      startGroupListener();
+
+      updateGroupUI();
+      groupModal.style.display = "none";
+
+      if (
+        records.length > 0 &&
+        confirm(
+          `自分の過去の記録（${records.length}件）も` +
+          "グループに共有しますか？"
+        )
+      ) {
+        try {
+          await shareAllRecordsToGroup();
+        } catch (error) {
+          showGroupError(error);
+        }
+      }
+    }
+
+    function validatePassword(password) {
+      if (password.length < 6) {
+        alert("パスワードは6文字以上で入力してください。");
+        return false;
+      }
+
+      return true;
+    }
+
+    /* 参加：すでにあるグループにパスワードで入る */
     document
       .getElementById("btnGroupJoin")
       .addEventListener("click", async () => {
@@ -1515,58 +1786,91 @@
         }
 
         const password = document
-          .getElementById("groupPassword")
+          .getElementById("joinPassword")
           .value.trim();
 
-        if (password.length < 6) {
-          alert("パスワードは6文字以上で入力してください。");
+        if (!validatePassword(password)) {
           return;
         }
 
         try {
           const groupId = await hashPassword(password);
+          const snapshot = await groupDocRef(groupId).get();
 
-          const snapshot = await groupRecordsRef(groupId)
-            .limit(1)
-            .get();
-
-          if (snapshot.empty) {
-            const ok = confirm(
-              "このパスワードのグループには、まだ記録がありません。\n" +
-              "新しいグループとして始めますか？\n\n" +
-              "既存のグループに参加するつもりなら、" +
-              "パスワードが合っているか確認してください。"
+          if (!snapshot.exists) {
+            alert(
+              "このパスワードのグループが見つかりません。\n" +
+              "パスワードを確認するか、「新しく作る」から" +
+              "グループを作成してください。"
             );
-
-            if (!ok) {
-              return;
-            }
+            return;
           }
 
-          currentGroupId = groupId;
-          localStorage.setItem(GROUP_KEY, groupId);
-
-          startGroupListener();
-
-          if (
-            records.length > 0 &&
-            confirm(
-              `自分の過去の記録（${records.length}件）も` +
-              "グループに共有しますか？"
-            )
-          ) {
-            await shareAllRecordsToGroup();
-          }
-
-          updateGroupUI();
-          groupModal.style.display = "none";
+          await enterGroup(groupId, snapshot.data().name || "");
         } catch (error) {
-          console.error("グループ参加エラー:", error);
+          showGroupError(error);
+        }
+      });
 
-          alert(
-            "グループに参加できませんでした。\n" +
-            error.message
-          );
+    /* 作成：グループ名とパスワードで新しいグループを作る */
+    document
+      .getElementById("btnGroupCreate")
+      .addEventListener("click", async () => {
+        const user = auth.currentUser;
+
+        if (!user) {
+          alert("グループを作成するにはGoogleログインが必要です。");
+          return;
+        }
+
+        const name = document
+          .getElementById("createName")
+          .value.trim();
+
+        const password = document
+          .getElementById("createPassword")
+          .value.trim();
+
+        const password2 = document
+          .getElementById("createPassword2")
+          .value.trim();
+
+        if (!name) {
+          alert("グループ名を入力してください。");
+          return;
+        }
+
+        if (!validatePassword(password)) {
+          return;
+        }
+
+        if (password !== password2) {
+          alert("パスワードが一致しません。");
+          return;
+        }
+
+        try {
+          const groupId = await hashPassword(password);
+          const snapshot = await groupDocRef(groupId).get();
+
+          if (snapshot.exists) {
+            alert(
+              "このパスワードはすでに使われています。\n" +
+              "別のパスワードにしてください。"
+            );
+            return;
+          }
+
+          await groupDocRef(groupId).set({
+            name,
+            createdBy: user.uid,
+            createdAt:
+              firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          await enterGroup(groupId, name);
+        } catch (error) {
+          showGroupError(error);
         }
       });
 
@@ -1585,10 +1889,12 @@
         stopGroupListener();
 
         currentGroupId = null;
+        currentGroupName = "";
         groupRecords = [];
         groupIds = new Set();
 
         localStorage.removeItem(GROUP_KEY);
+        localStorage.removeItem(GROUP_NAME_KEY);
 
         updateGroupUI();
         renderMarkers();
@@ -1991,6 +2297,16 @@
           "settingPickupFee"
         ).value = settings.pickupFee;
 
+        document.getElementById(
+          "settingDisplayName"
+        ).value = localStorage.getItem(NAME_KEY) || "";
+
+        document.getElementById(
+          "settingDisplayName"
+        ).placeholder =
+          (auth.currentUser && auth.currentUser.displayName) ||
+          "空欄ならGoogleの名前";
+
         settingsModal.style.display = "flex";
       });
 
@@ -2049,6 +2365,24 @@
 
         saveSettings();
 
+        const oldName = getDisplayName();
+
+        const newName = document
+          .getElementById("settingDisplayName")
+          .value.trim();
+
+        if (newName) {
+          localStorage.setItem(NAME_KEY, newName);
+        } else {
+          localStorage.removeItem(NAME_KEY);
+        }
+
+        if (getDisplayName() !== oldName) {
+          updateNameInGroup(getDisplayName()).catch(
+            showGroupError
+          );
+        }
+
         settingsModal.style.display = "none";
 
         updateLegend();
@@ -2062,6 +2396,22 @@
      */
 
     const timeSlider = document.getElementById("timeSlider");
+
+    /* スライダー上に 0〜23 の時刻ガイドを並べる */
+    const timeGuide = document.getElementById("timeGuide");
+
+    for (let hour = 0; hour < 24; hour++) {
+      const tick = document.createElement("span");
+
+      tick.textContent = String(hour);
+      tick.style.left = `${(hour * 60 / 1435) * 100}%`;
+
+      if (hour % 6 === 0) {
+        tick.className = "major";
+      }
+
+      timeGuide.appendChild(tick);
+    }
     const timeLabel = document.getElementById("timeLabel");
 
     function formatMinute(minute) {
