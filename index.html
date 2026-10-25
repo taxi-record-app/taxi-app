@@ -2,13 +2,21 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
   >
 
   <title>タクシー記録アプリ</title>
+
+  <!-- ホーム画面追加用（アプリ名・アイコン） -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="theme-color" content="#ffc107">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="タクシー記録">
 
   <!-- Leaflet -->
   <link
@@ -39,24 +47,25 @@
     }
 
     /* ログイン表示 */
-   #authBar {
-  position: absolute;
-  top: 10px;
-  left: 50px;
-  z-index: 1100;
+    #authBar {
+      position: absolute;
+      top: 10px;
+      left: 50px;
+      z-index: 1100;
 
-  display: flex;
-  align-items: center;
-  gap: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
 
-  width: fit-content;
-  max-width: calc(100% - 60px);
-  padding: 8px 10px;
+      width: fit-content;
+      max-width: calc(100% - 60px);
+      box-sizing: border-box;
+      padding: 8px 6px 8px 10px;
 
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-}
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
 
     #authBar button {
       flex-shrink: 0;
@@ -83,6 +92,60 @@
       text-overflow: ellipsis;
     }
 
+    /* 未ログイン時は空のspanが余白を作らないようにする */
+    #userInfo:empty {
+      display: none;
+    }
+
+    /* 時間帯スライダー */
+    #timeBar {
+      position: absolute;
+      top: 68px;
+      right: 10px;
+      left: 50px;
+      z-index: 1100;
+
+      box-sizing: border-box;
+      padding: 6px 10px 8px;
+
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    #timeBarTop {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #timeLabel {
+      flex: 1;
+      min-width: 0;
+
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    #timeBar button {
+      padding: 4px 10px;
+
+      font-size: 12px;
+
+      background: #eee;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+
+      cursor: pointer;
+    }
+
+    #timeSlider {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      margin: 6px 0 0;
+    }
+
     .btn {
       position: absolute;
       z-index: 1000;
@@ -104,9 +167,8 @@
       cursor: pointer;
     }
 
-    #btnLocate {
-      right: 15px;
-      bottom: 180px;
+    .btn.active {
+      background: #bbdefb;
     }
 
     #btnAdd {
@@ -117,12 +179,17 @@
       background: #2196f3;
     }
 
-    #btnFilter {
+    #btnLocate {
+      right: 15px;
+      bottom: 180px;
+    }
+
+    #btnSettings {
       right: 15px;
       bottom: 250px;
     }
 
-    #btnSettings {
+    #btnGroup {
       right: 15px;
       bottom: 320px;
     }
@@ -132,34 +199,76 @@
       left: 15px;
     }
 
-    #crosshair {
+    /* 金額の凡例 */
+    #amountLegend {
+      position: absolute;
+      bottom: 170px;
+      left: 15px;
+      z-index: 1000;
+
+      display: none;
+
+      padding: 6px 10px;
+
+      font-size: 12px;
+      line-height: 1.6;
+
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      margin-right: 5px;
+
+      vertical-align: -1px;
+
+      border-radius: 50%;
+    }
+
+    /*
+     * 常時表示のピン。
+     * 幅・高さ0の枠を画面中央に置き、SVGの先端をその一点に合わせることで、
+     * 「ピンの先端 = 地図の中心 = 記録される位置」にしています。
+     */
+    #centerPin {
       position: absolute;
       top: 50%;
       left: 50%;
       z-index: 999;
 
-      display: none;
-
-      font-size: 40px;
+      width: 0;
+      height: 0;
 
       pointer-events: none;
-      transform: translate(-50%, -100%);
     }
 
-    #addPanel {
+    #centerPin svg {
       position: absolute;
-      right: 0;
       bottom: 0;
-      left: 0;
-      z-index: 1001;
+      left: -16px;
 
-      display: none;
+      display: block;
+      width: 32px;
+      height: 44px;
 
-      padding: 15px;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+    }
 
-      background: #fff;
-      border-radius: 15px 15px 0 0;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+    #centerPin::after {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+
+      width: 4px;
+      height: 4px;
+
+      background: #000;
+      border-radius: 50%;
     }
 
     .modal-overlay {
@@ -212,6 +321,14 @@
       border-radius: 6px;
     }
 
+    .modal-note {
+      margin: 10px 0 0;
+
+      color: #666;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
     .choice-group {
       display: flex;
       gap: 8px;
@@ -251,9 +368,9 @@
     .modal-actions button {
       flex: 1;
 
-      padding: 12px;
+      padding: 12px 6px;
 
-      font-size: 16px;
+      font-size: 15px;
 
       border: none;
       border-radius: 8px;
@@ -266,8 +383,27 @@
       background: #2196f3;
     }
 
+    .btn-danger {
+      color: #fff;
+      background: #e53935;
+    }
+
     .btn-cancel {
       background: #ccc;
+    }
+
+    .detail-row {
+      margin-top: 8px;
+
+      font-size: 15px;
+    }
+
+    .detail-row span {
+      display: inline-block;
+      width: 5.5em;
+
+      color: #666;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -284,25 +420,48 @@
     <span id="userInfo"></span>
   </div>
 
+  <!-- 時間帯スライダー -->
+  <div id="timeBar">
+    <div id="timeBarTop">
+      <div id="timeLabel">🕒 全時間帯を表示</div>
+      <button id="btnTimeNow" type="button">いま</button>
+      <button id="btnTimeClear" type="button">解除</button>
+    </div>
+
+    <input
+      type="range"
+      id="timeSlider"
+      min="0"
+      max="1435"
+      step="5"
+      value="720"
+    >
+  </div>
+
   <div id="map"></div>
-  <div id="crosshair">📍</div>
+
+  <!-- 常時表示のピン（先端が地図の中心） -->
+  <div id="centerPin">
+    <svg viewBox="0 0 32 44" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M16 44C16 44 2 27 2 16A14 14 0 1 1 30 16C30 27 16 44 16 44Z"
+        fill="#e53935"
+        stroke="#fff"
+        stroke-width="2"
+      />
+      <circle cx="16" cy="16" r="5" fill="#fff" />
+    </svg>
+  </div>
+
+  <div id="amountLegend"></div>
 
   <button
-    id="btnLocate"
+    id="btnGroup"
     class="btn"
     type="button"
-    title="現在地へ移動"
+    title="グループ"
   >
-    🎯
-  </button>
-
-  <button
-    id="btnFilter"
-    class="btn"
-    type="button"
-    title="時間帯フィルター"
-  >
-    🕒
+    👥
   </button>
 
   <button
@@ -315,10 +474,19 @@
   </button>
 
   <button
+    id="btnLocate"
+    class="btn"
+    type="button"
+    title="現在地へ移動"
+  >
+    🎯
+  </button>
+
+  <button
     id="btnAdd"
     class="btn"
     type="button"
-    title="記録を追加"
+    title="ピンの位置に記録"
   >
     ➕
   </button>
@@ -332,48 +500,10 @@
     🔘
   </button>
 
-  <!-- 記録場所決定パネル -->
-  <div id="addPanel">
-    <p style="text-align: center; margin: 0 0 10px;">
-      地図を動かして記録したい場所に合わせてください
-    </p>
-
-    <div style="display: flex; gap: 10px;">
-      <button
-        id="btnConfirmLocation"
-        type="button"
-        style="
-          flex: 1;
-          padding: 12px;
-          color: #fff;
-          background: #4caf50;
-          border: none;
-          border-radius: 8px;
-        "
-      >
-        ✅ ここに記録
-      </button>
-
-      <button
-        id="btnCancelAdd"
-        type="button"
-        style="
-          flex: 1;
-          padding: 12px;
-          background: #ccc;
-          border: none;
-          border-radius: 8px;
-        "
-      >
-        ✖ キャンセル
-      </button>
-    </div>
-  </div>
-
-  <!-- 記録入力モーダル -->
+  <!-- 記録入力・編集モーダル -->
   <div id="recordModal" class="modal-overlay">
     <div class="modal-box">
-      <h3>乗車記録の入力</h3>
+      <h3 id="recordModalTitle">乗車記録の入力</h3>
 
       <label>乗り方</label>
 
@@ -383,7 +513,7 @@
         <div class="choice-btn" data-value="おそい">🔴 おそい</div>
       </div>
 
-      <label for="inputRyoukin">きっかけ</label>
+      <label>きっかけ</label>
 
       <div class="choice-group" id="kikkakeGroup">
         <div class="choice-btn" data-value="手上げ">✋ 手上げ</div>
@@ -416,13 +546,36 @@
     </div>
   </div>
 
+  <!-- 記録の詳細（編集・削除） -->
+  <div id="detailModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>乗車記録</h3>
+
+      <div id="detailBody"></div>
+
+      <div class="modal-actions">
+        <button class="btn-save" id="btnDetailEdit" type="button">
+          編集
+        </button>
+
+        <button class="btn-danger" id="btnDetailDelete" type="button">
+          削除
+        </button>
+
+        <button class="btn-cancel" id="btnDetailClose" type="button">
+          閉じる
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 設定モーダル -->
   <div id="settingsModal" class="modal-overlay">
     <div class="modal-box">
       <h3>設定</h3>
 
       <label for="settingBoundary1">
-        三角／丸の境界金額（円）
+        赤／黄の境界金額（円）
       </label>
       <input
         type="number"
@@ -432,7 +585,7 @@
       >
 
       <label for="settingBoundary2">
-        丸／二重丸の境界金額（円）
+        黄／緑の境界金額（円）
       </label>
       <input
         type="number"
@@ -461,25 +614,54 @@
     </div>
   </div>
 
-  <!-- 時間帯フィルター -->
-  <div id="filterModal" class="modal-overlay">
+  <!-- グループモーダル -->
+  <div id="groupModal" class="modal-overlay">
     <div class="modal-box">
-      <h3>表示する時間帯</h3>
+      <h3>グループ</h3>
 
-      <label for="filterStart">開始時刻</label>
-      <select id="filterStart"></select>
+      <p id="groupLoginNote" class="modal-note" style="display: none;">
+        グループを使うには、画面上部の「Googleでログイン」が必要です。
+      </p>
 
-      <label for="filterEnd">終了時刻</label>
-      <select id="filterEnd"></select>
+      <div id="groupJoinArea">
+        <label for="groupPassword">グループのパスワード</label>
+        <input
+          type="password"
+          id="groupPassword"
+          autocomplete="off"
+          placeholder="6文字以上"
+        >
 
-      <div class="modal-actions">
-        <button class="btn-save" id="btnApplyFilter" type="button">
-          適用
-        </button>
+        <p class="modal-note">
+          同じパスワードを入力した人どうしで、過去の記録が共有されます。
+          パスワードを知っている人は誰でも参加できるので、
+          推測されにくい長めのものにしてください。
+          記録した人のGoogleアカウント名もグループ内に表示されます。
+        </p>
 
-        <button class="btn-cancel" id="btnClearFilter" type="button">
-          解除
-        </button>
+        <div class="modal-actions">
+          <button class="btn-save" id="btnGroupJoin" type="button">
+            参加する
+          </button>
+
+          <button class="btn-cancel" id="btnGroupCloseA" type="button">
+            閉じる
+          </button>
+        </div>
+      </div>
+
+      <div id="groupJoinedArea" style="display: none;">
+        <p>グループに参加中です。<br>メンバーの記録は青い枠で表示されます。</p>
+
+        <div class="modal-actions">
+          <button class="btn-danger" id="btnGroupLeave" type="button">
+            退出する
+          </button>
+
+          <button class="btn-cancel" id="btnGroupCloseB" type="button">
+            閉じる
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -528,16 +710,22 @@
     const savedSettings = localStorage.getItem("taxi_settings");
 
     let settings = savedSettings
-      ? JSON.parse(savedSettings)
+      ? { ...DEFAULT_SETTINGS, ...JSON.parse(savedSettings) }
       : { ...DEFAULT_SETTINGS };
 
     let records = [];
     let mode = "normal";
-    let filterRange = null;
+    let filterMinute = null;
     let pendingLatLng = null;
+    let editingRecord = null;
+    let detailRecord = null;
 
     let selectedNorikata = null;
     let selectedKikkake = null;
+
+    const DRAFT_KEY = "taxi_draft";
+    const VIEW_KEY = "taxi_view";
+    const GROUP_KEY = "taxi_group_id";
 
     /*
      * ========================================
@@ -582,6 +770,25 @@
       );
     }
 
+    /* Firestoreに書き込む項目だけを取り出す */
+    function cleanRecord(record) {
+      return {
+        id: record.id,
+        lat: record.lat,
+        lng: record.lng,
+        time: record.time,
+        norikata: record.norikata,
+        kikkake: record.kikkake,
+        ryoukin: record.ryoukin
+      };
+    }
+
+    function isOwnRecord(record) {
+      const user = auth.currentUser;
+
+      return !record.uid || (user && record.uid === user.uid);
+    }
+
     /*
      * ========================================
      * 地図
@@ -605,6 +812,51 @@
     let currentLocationMarker = null;
     let currentAccuracyCircle = null;
     let firstFix = true;
+
+    /*
+     * 直前に見ていた地図の位置を覚えておき、
+     * 30分以内に開き直した場合は、その位置から再開します。
+     */
+    function restoreRecentView() {
+      try {
+        const view = JSON.parse(localStorage.getItem(VIEW_KEY));
+
+        if (
+          view &&
+          Date.now() - view.savedAt < 30 * 60 * 1000
+        ) {
+          map.setView([view.lat, view.lng], view.zoom, {
+            animate: false
+          });
+
+          firstFix = false;
+        }
+      } catch (error) {
+        console.error("地図位置の復元エラー:", error);
+      }
+    }
+
+    function getCurrentView() {
+      const center = map.getCenter();
+
+      return {
+        lat: center.lat,
+        lng: center.lng,
+        zoom: map.getZoom()
+      };
+    }
+
+    map.on("moveend", () => {
+      localStorage.setItem(
+        VIEW_KEY,
+        JSON.stringify({
+          ...getCurrentView(),
+          savedAt: Date.now()
+        })
+      );
+    });
+
+    restoreRecentView();
 
     function startWatchingLocation() {
       if (!navigator.geolocation) {
@@ -693,31 +945,184 @@
 
     /*
      * ========================================
-     * 記録場所の選択
+     * 記録入力モーダル（新規・編集）
      * ========================================
      */
 
-    const crosshair = document.getElementById("crosshair");
-    const addPanel = document.getElementById("addPanel");
     const recordModal = document.getElementById("recordModal");
+    const inputRyoukin = document.getElementById("inputRyoukin");
+    const inputDateTime = document.getElementById("inputDateTime");
 
+    function toLocalInputValue(date) {
+      const shifted = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      );
+
+      return shifted.toISOString().slice(0, 16);
+    }
+
+    function selectChoice(groupId, value) {
+      document
+        .querySelectorAll(`#${groupId} .choice-btn`)
+        .forEach((item) => {
+          item.classList.toggle(
+            "selected",
+            item.dataset.value === value
+          );
+        });
+    }
+
+    document
+      .querySelectorAll("#norikataGroup .choice-btn")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedNorikata = button.dataset.value;
+          selectChoice("norikataGroup", selectedNorikata);
+          saveDraft();
+        });
+      });
+
+    document
+      .querySelectorAll("#kikkakeGroup .choice-btn")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedKikkake = button.dataset.value;
+          selectChoice("kikkakeGroup", selectedKikkake);
+          saveDraft();
+        });
+      });
+
+    inputRyoukin.addEventListener("input", saveDraft);
+    inputDateTime.addEventListener("input", saveDraft);
+    inputDateTime.addEventListener("change", saveDraft);
+
+    /*
+     * 入力途中の内容を端末に保存します。
+     * 他のアプリを使っている間にページが再読み込みされても、
+     * 戻ったときに入力画面とピンの位置を復元できます。
+     */
+    function saveDraft() {
+      if (recordModal.style.display !== "flex") {
+        return;
+      }
+
+      localStorage.setItem(
+        DRAFT_KEY,
+        JSON.stringify({
+          pending: pendingLatLng,
+          editingRecord: editingRecord ? cleanRecord(editingRecord) : null,
+          norikata: selectedNorikata,
+          kikkake: selectedKikkake,
+          ryoukin: inputRyoukin.value,
+          dateTime: inputDateTime.value,
+          view: getCurrentView(),
+          savedAt: Date.now()
+        })
+      );
+    }
+
+    function clearDraft() {
+      localStorage.removeItem(DRAFT_KEY);
+    }
+
+    function openRecordModal(record) {
+      editingRecord = record || null;
+
+      document.getElementById("recordModalTitle").textContent =
+        record ? "乗車記録の編集" : "乗車記録の入力";
+
+      if (record) {
+        selectedNorikata = record.norikata;
+        selectedKikkake = record.kikkake;
+        inputRyoukin.value = record.ryoukin;
+
+        const date = new Date(record.time);
+
+        inputDateTime.value = Number.isNaN(date.getTime())
+          ? toLocalInputValue(new Date())
+          : toLocalInputValue(date);
+      } else {
+        selectedNorikata = null;
+        selectedKikkake = null;
+        inputRyoukin.value = "";
+        inputDateTime.value = toLocalInputValue(new Date());
+      }
+
+      selectChoice("norikataGroup", selectedNorikata);
+      selectChoice("kikkakeGroup", selectedKikkake);
+
+      recordModal.style.display = "flex";
+
+      saveDraft();
+    }
+
+    function closeRecordModal() {
+      recordModal.style.display = "none";
+      pendingLatLng = null;
+      editingRecord = null;
+      clearDraft();
+    }
+
+    function restoreDraft() {
+      let draft = null;
+
+      try {
+        draft = JSON.parse(localStorage.getItem(DRAFT_KEY));
+      } catch (error) {
+        draft = null;
+      }
+
+      if (
+        !draft ||
+        Date.now() - draft.savedAt > 12 * 60 * 60 * 1000
+      ) {
+        clearDraft();
+        return;
+      }
+
+      if (draft.editingRecord) {
+        /*
+         * ログイン状態の確認前に復元するため、
+         * 編集中の記録そのものを下書きに保存しています。
+         */
+        editingRecord = draft.editingRecord;
+      } else {
+        if (!draft.pending) {
+          clearDraft();
+          return;
+        }
+
+        editingRecord = null;
+        pendingLatLng = draft.pending;
+      }
+
+      if (draft.view) {
+        map.setView(
+          [draft.view.lat, draft.view.lng],
+          draft.view.zoom,
+          { animate: false }
+        );
+
+        firstFix = false;
+      }
+
+      document.getElementById("recordModalTitle").textContent =
+        editingRecord ? "乗車記録の編集" : "乗車記録の入力";
+
+      selectedNorikata = draft.norikata;
+      selectedKikkake = draft.kikkake;
+      inputRyoukin.value = draft.ryoukin || "";
+      inputDateTime.value = draft.dateTime || "";
+
+      selectChoice("norikataGroup", selectedNorikata);
+      selectChoice("kikkakeGroup", selectedKikkake);
+
+      recordModal.style.display = "flex";
+    }
+
+    /* ＋ボタン：ピンの位置（地図の中心）にそのまま記録する */
     document
       .getElementById("btnAdd")
-      .addEventListener("click", () => {
-        crosshair.style.display = "block";
-        addPanel.style.display = "block";
-      });
-
-    document
-      .getElementById("btnCancelAdd")
-      .addEventListener("click", () => {
-        crosshair.style.display = "none";
-        addPanel.style.display = "none";
-        pendingLatLng = null;
-      });
-
-    document
-      .getElementById("btnConfirmLocation")
       .addEventListener("click", () => {
         const center = map.getCenter();
 
@@ -726,89 +1131,23 @@
           lng: center.lng
         };
 
-        crosshair.style.display = "none";
-        addPanel.style.display = "none";
-
-        openRecordModal();
+        openRecordModal(null);
       });
-
-    /*
-     * ========================================
-     * 選択ボタン
-     * ========================================
-     */
-
-    document
-      .querySelectorAll("#norikataGroup .choice-btn")
-      .forEach((button) => {
-        button.addEventListener("click", () => {
-          document
-            .querySelectorAll("#norikataGroup .choice-btn")
-            .forEach((item) => {
-              item.classList.remove("selected");
-            });
-
-          button.classList.add("selected");
-          selectedNorikata = button.dataset.value;
-        });
-      });
-
-    document
-      .querySelectorAll("#kikkakeGroup .choice-btn")
-      .forEach((button) => {
-        button.addEventListener("click", () => {
-          document
-            .querySelectorAll("#kikkakeGroup .choice-btn")
-            .forEach((item) => {
-              item.classList.remove("selected");
-            });
-
-          button.classList.add("selected");
-          selectedKikkake = button.dataset.value;
-        });
-      });
-
-    function openRecordModal() {
-      selectedNorikata = null;
-      selectedKikkake = null;
-
-      document
-        .querySelectorAll(".choice-btn")
-        .forEach((button) => {
-          button.classList.remove("selected");
-        });
-
-      document.getElementById("inputRyoukin").value = "";
-
-      const now = new Date();
-
-      now.setMinutes(
-        now.getMinutes() - now.getTimezoneOffset()
-      );
-
-      document.getElementById("inputDateTime").value =
-        now.toISOString().slice(0, 16);
-
-      recordModal.style.display = "flex";
-    }
 
     document
       .getElementById("btnCancelRecord")
-      .addEventListener("click", () => {
-        recordModal.style.display = "none";
-        pendingLatLng = null;
-      });
+      .addEventListener("click", closeRecordModal);
 
     /*
      * ========================================
-     * 記録の保存
+     * 記録の保存・更新
      * ========================================
      */
 
     document
       .getElementById("btnSaveRecord")
       .addEventListener("click", async () => {
-        if (!pendingLatLng) {
+        if (!editingRecord && !pendingLatLng) {
           alert("記録する場所が選択されていません。");
           return;
         }
@@ -819,7 +1158,7 @@
         }
 
         const ryoukin = Number.parseInt(
-          document.getElementById("inputRyoukin").value,
+          inputRyoukin.value,
           10
         );
 
@@ -828,18 +1167,31 @@
           return;
         }
 
-        const dateTimeValue =
-          document.getElementById("inputDateTime").value;
-
-        if (!dateTimeValue) {
+        if (!inputDateTime.value) {
           alert("日時を入力してください。");
           return;
         }
 
-        const date = new Date(dateTimeValue);
+        const date = new Date(inputDateTime.value);
 
         if (Number.isNaN(date.getTime())) {
           alert("日時を正しく入力してください。");
+          return;
+        }
+
+        if (editingRecord) {
+          const updated = {
+            ...cleanRecord(editingRecord),
+            time: date.toISOString(),
+            norikata: selectedNorikata,
+            kikkake: selectedKikkake,
+            ryoukin
+          };
+
+          closeRecordModal();
+
+          await updateRecord(updated);
+
           return;
         }
 
@@ -860,12 +1212,15 @@
         saveRecordsLocally();
         renderMarkers();
 
-        recordModal.style.display = "none";
-        pendingLatLng = null;
+        closeRecordModal();
 
         if (auth.currentUser) {
           try {
             await saveToFirestore(record);
+
+            if (currentGroupId) {
+              await saveToGroup(record);
+            }
           } catch (error) {
             console.error(
               "Firestoreへの保存エラー:",
@@ -879,6 +1234,55 @@
           }
         }
       });
+
+    async function updateRecord(updated) {
+      const index = records.findIndex((item) => {
+        return item.id === updated.id;
+      });
+
+      let documentId = updated.id;
+
+      if (index >= 0) {
+        documentId =
+          records[index]._firestoreDocId || updated.id;
+
+        records[index] = {
+          ...records[index],
+          ...updated
+        };
+      } else {
+        records.push(updated);
+      }
+
+      saveRecordsLocally();
+      renderMarkers();
+
+      const user = auth.currentUser;
+
+      if (!user) {
+        return;
+      }
+
+      try {
+        await db
+          .collection("users")
+          .doc(user.uid)
+          .collection("records")
+          .doc(documentId)
+          .set(updated);
+
+        if (currentGroupId && groupIds.has(updated.id)) {
+          await saveToGroup(updated);
+        }
+      } catch (error) {
+        console.error("Firestoreの更新エラー:", error);
+
+        alert(
+          "端末では変更しましたが、クラウドの更新に失敗しました。\n" +
+          error.message
+        );
+      }
+    }
 
     /*
      * ========================================
@@ -902,7 +1306,7 @@
         .doc(user.uid)
         .collection("records")
         .doc(record.id)
-        .set(record);
+        .set(cleanRecord(record));
     }
 
     async function loadRecordsFromFirestore() {
@@ -956,6 +1360,262 @@
 
     /*
      * ========================================
+     * グループ（パスワード共有）
+     *
+     * パスワードをSHA-256でハッシュ化した値をグループIDとして使い、
+     * groups/{グループID}/records に記録を保存します。
+     * 同じパスワードを入力した人は同じグループIDになるため、
+     * 記録を共有できます。
+     * ========================================
+     */
+
+    let currentGroupId = localStorage.getItem(GROUP_KEY) || null;
+    let groupRecords = [];
+    let groupIds = new Set();
+    let unsubscribeGroup = null;
+
+    async function hashPassword(password) {
+      const data = new TextEncoder().encode(
+        "taxi-record-app:v1:" + password
+      );
+
+      const buffer = await crypto.subtle.digest("SHA-256", data);
+
+      return Array.from(new Uint8Array(buffer))
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    function groupRecordsRef(groupId) {
+      return db
+        .collection("groups")
+        .doc(groupId)
+        .collection("records");
+    }
+
+    async function saveToGroup(record) {
+      const user = auth.currentUser;
+
+      if (!user || !currentGroupId) {
+        return;
+      }
+
+      await groupRecordsRef(currentGroupId)
+        .doc(record.id)
+        .set({
+          ...cleanRecord(record),
+          uid: user.uid,
+          userName: user.displayName || ""
+        });
+    }
+
+    function stopGroupListener() {
+      if (unsubscribeGroup) {
+        unsubscribeGroup();
+        unsubscribeGroup = null;
+      }
+    }
+
+    function startGroupListener() {
+      stopGroupListener();
+
+      if (!auth.currentUser || !currentGroupId) {
+        return;
+      }
+
+      unsubscribeGroup = groupRecordsRef(currentGroupId).onSnapshot(
+        (snapshot) => {
+          groupRecords = snapshot.docs.map((documentSnapshot) => {
+            const data = documentSnapshot.data();
+
+            return {
+              ...data,
+              id: data.id || documentSnapshot.id
+            };
+          });
+
+          groupIds = new Set(
+            groupRecords.map((item) => item.id)
+          );
+
+          renderMarkers();
+        },
+        (error) => {
+          console.error("グループの読み込みエラー:", error);
+
+          alert(
+            "グループの記録を読み込めませんでした。\n" +
+            error.message
+          );
+        }
+      );
+    }
+
+    async function shareAllRecordsToGroup() {
+      const user = auth.currentUser;
+
+      if (!user || !currentGroupId) {
+        return;
+      }
+
+      for (let i = 0; i < records.length; i += 400) {
+        const batch = db.batch();
+
+        records.slice(i, i + 400).forEach((record) => {
+          batch.set(
+            groupRecordsRef(currentGroupId).doc(record.id),
+            {
+              ...cleanRecord(record),
+              uid: user.uid,
+              userName: user.displayName || ""
+            }
+          );
+        });
+
+        await batch.commit();
+      }
+    }
+
+    const groupModal = document.getElementById("groupModal");
+    const btnGroup = document.getElementById("btnGroup");
+
+    function updateGroupUI() {
+      const joined = Boolean(currentGroupId);
+
+      btnGroup.classList.toggle("active", joined);
+
+      document.getElementById("groupJoinArea").style.display =
+        joined ? "none" : "block";
+
+      document.getElementById("groupJoinedArea").style.display =
+        joined ? "block" : "none";
+
+      document.getElementById("groupLoginNote").style.display =
+        auth.currentUser ? "none" : "block";
+    }
+
+    btnGroup.addEventListener("click", () => {
+      document.getElementById("groupPassword").value = "";
+      updateGroupUI();
+      groupModal.style.display = "flex";
+    });
+
+    ["btnGroupCloseA", "btnGroupCloseB"].forEach((id) => {
+      document.getElementById(id).addEventListener("click", () => {
+        groupModal.style.display = "none";
+      });
+    });
+
+    document
+      .getElementById("btnGroupJoin")
+      .addEventListener("click", async () => {
+        if (!auth.currentUser) {
+          alert("グループに参加するにはGoogleログインが必要です。");
+          return;
+        }
+
+        const password = document
+          .getElementById("groupPassword")
+          .value.trim();
+
+        if (password.length < 6) {
+          alert("パスワードは6文字以上で入力してください。");
+          return;
+        }
+
+        try {
+          const groupId = await hashPassword(password);
+
+          const snapshot = await groupRecordsRef(groupId)
+            .limit(1)
+            .get();
+
+          if (snapshot.empty) {
+            const ok = confirm(
+              "このパスワードのグループには、まだ記録がありません。\n" +
+              "新しいグループとして始めますか？\n\n" +
+              "既存のグループに参加するつもりなら、" +
+              "パスワードが合っているか確認してください。"
+            );
+
+            if (!ok) {
+              return;
+            }
+          }
+
+          currentGroupId = groupId;
+          localStorage.setItem(GROUP_KEY, groupId);
+
+          startGroupListener();
+
+          if (
+            records.length > 0 &&
+            confirm(
+              `自分の過去の記録（${records.length}件）も` +
+              "グループに共有しますか？"
+            )
+          ) {
+            await shareAllRecordsToGroup();
+          }
+
+          updateGroupUI();
+          groupModal.style.display = "none";
+        } catch (error) {
+          console.error("グループ参加エラー:", error);
+
+          alert(
+            "グループに参加できませんでした。\n" +
+            error.message
+          );
+        }
+      });
+
+    document
+      .getElementById("btnGroupLeave")
+      .addEventListener("click", () => {
+        const ok = confirm(
+          "グループから退出しますか？\n" +
+          "すでに共有した記録はグループに残ります。"
+        );
+
+        if (!ok) {
+          return;
+        }
+
+        stopGroupListener();
+
+        currentGroupId = null;
+        groupRecords = [];
+        groupIds = new Set();
+
+        localStorage.removeItem(GROUP_KEY);
+
+        updateGroupUI();
+        renderMarkers();
+
+        groupModal.style.display = "none";
+      });
+
+    /* 自分の記録とグループの記録を、idの重複なしでまとめる */
+    function getDisplayRecords() {
+      const merged = new Map();
+
+      groupRecords.forEach((record) => {
+        merged.set(record.id, record);
+      });
+
+      records.forEach((record) => {
+        merged.set(record.id, {
+          ...(merged.get(record.id) || {}),
+          ...record
+        });
+      });
+
+      return Array.from(merged.values());
+    }
+
+    /*
+     * ========================================
      * マーカー表示
      * ========================================
      */
@@ -972,6 +1632,12 @@
       "無線": "📻"
     };
 
+    const AMOUNT_COLORS = {
+      low: "#f44336",
+      middle: "#ffc107",
+      high: "#4caf50"
+    };
+
     function getClassificationAmount(record) {
       if (record.kikkake === "手上げ") {
         return record.ryoukin;
@@ -983,19 +1649,22 @@
       );
     }
 
-    function getShapeSymbol(amount) {
+    function getAmountColor(amount) {
       if (amount < settings.boundary1) {
-        return "▲";
+        return AMOUNT_COLORS.low;
       }
 
       if (amount < settings.boundary2) {
-        return "●";
+        return AMOUNT_COLORS.middle;
       }
 
-      return "◎";
+      return AMOUNT_COLORS.high;
     }
 
     function createDivIcon(record) {
+      /* 自分の記録は白い枠、グループのメンバーの記録は青い枠 */
+      const borderColor = isOwnRecord(record) ? "#fff" : "#1565c0";
+
       let html = "";
 
       if (mode === "normal") {
@@ -1015,7 +1684,7 @@
             color:#000;
             font-size:16px;
             background:${color};
-            border:2px solid #fff;
+            border:2px solid ${borderColor};
             border-radius:50%;
             box-shadow:0 1px 4px rgba(0,0,0,0.4);
           ">
@@ -1023,29 +1692,20 @@
           </div>
         `;
       } else {
-        const amount =
-          getClassificationAmount(record);
-
-        const symbol =
-          getShapeSymbol(amount);
+        const color = getAmountColor(
+          getClassificationAmount(record)
+        );
 
         html = `
           <div style="
-            display:flex;
-            align-items:center;
-            justify-content:center;
             width:32px;
             height:32px;
-            color:#333;
-            font-size:18px;
-            font-weight:bold;
-            background:#fff;
-            border:2px solid #333;
+            box-sizing:border-box;
+            background:${color};
+            border:3px solid ${borderColor};
             border-radius:50%;
-            box-shadow:0 1px 4px rgba(0,0,0,0.4);
-          ">
-            ${symbol}
-          </div>
+            box-shadow:0 1px 4px rgba(0,0,0,0.5);
+          "></div>
         `;
       }
 
@@ -1057,8 +1717,28 @@
       });
     }
 
+    function updateLegend() {
+      const legend = document.getElementById("amountLegend");
+
+      if (mode !== "amount") {
+        legend.style.display = "none";
+        return;
+      }
+
+      const b1 = settings.boundary1.toLocaleString();
+      const b2 = settings.boundary2.toLocaleString();
+
+      legend.innerHTML =
+        `<div><span class="legend-dot" style="background:${AMOUNT_COLORS.low}"></span>${b1}円未満</div>` +
+        `<div><span class="legend-dot" style="background:${AMOUNT_COLORS.middle}"></span>${b1}〜${b2}円未満</div>` +
+        `<div><span class="legend-dot" style="background:${AMOUNT_COLORS.high}"></span>${b2}円以上</div>`;
+
+      legend.style.display = "block";
+    }
+
+    /* スライダーの時刻の前後30分（日付は問わない）だけ表示 */
     function passesFilter(record) {
-      if (!filterRange) {
+      if (filterMinute === null) {
         return true;
       }
 
@@ -1068,20 +1748,18 @@
         return false;
       }
 
-      const hour = date.getHours();
-      const { start, end } = filterRange;
+      const minute = date.getHours() * 60 + date.getMinutes();
 
-      if (start <= end) {
-        return hour >= start && hour <= end;
-      }
+      let diff = Math.abs(minute - filterMinute);
+      diff = Math.min(diff, 1440 - diff);
 
-      return hour >= start || hour <= end;
+      return diff <= 30;
     }
 
     function renderMarkers() {
       markersLayer.clearLayers();
 
-      records
+      getDisplayRecords()
         .filter((record) => {
           return (
             Number.isFinite(Number(record.lat)) &&
@@ -1098,22 +1776,7 @@
           );
 
           marker.on("click", () => {
-            const date = new Date(record.time);
-
-            const dateText = Number.isNaN(date.getTime())
-              ? "日時不明"
-              : date.toLocaleString("ja-JP");
-
-            const message =
-              "このピンを削除しますか？\n\n" +
-              `日時: ${dateText}\n` +
-              `乗り方: ${record.norikata}\n` +
-              `きっかけ: ${record.kikkake}\n` +
-              `料金: ${record.ryoukin}円`;
-
-            if (confirm(message)) {
-              deleteRecord(record);
-            }
+            openDetailModal(record);
           });
 
           marker.addTo(markersLayer);
@@ -1122,14 +1785,119 @@
 
     /*
      * ========================================
+     * 記録の詳細（編集・削除）
+     * ========================================
+     */
+
+    const detailModal = document.getElementById("detailModal");
+
+    function addDetailRow(parent, label, value) {
+      const row = document.createElement("div");
+      row.className = "detail-row";
+
+      const labelElement = document.createElement("span");
+      labelElement.textContent = label;
+
+      row.appendChild(labelElement);
+      row.appendChild(document.createTextNode(value));
+
+      parent.appendChild(row);
+    }
+
+    function openDetailModal(record) {
+      detailRecord = record;
+
+      const date = new Date(record.time);
+
+      const dateText = Number.isNaN(date.getTime())
+        ? "日時不明"
+        : date.toLocaleString("ja-JP");
+
+      const body = document.getElementById("detailBody");
+      body.textContent = "";
+
+      addDetailRow(body, "日時", dateText);
+      addDetailRow(body, "乗り方", record.norikata);
+      addDetailRow(body, "きっかけ", record.kikkake);
+      addDetailRow(body, "料金", `${record.ryoukin}円`);
+
+      const own = isOwnRecord(record);
+
+      if (!own) {
+        addDetailRow(
+          body,
+          "記録した人",
+          record.userName || "グループのメンバー"
+        );
+      }
+
+      document.getElementById("btnDetailEdit").style.display =
+        own ? "block" : "none";
+
+      document.getElementById("btnDetailDelete").style.display =
+        own ? "block" : "none";
+
+      detailModal.style.display = "flex";
+    }
+
+    function closeDetailModal() {
+      detailModal.style.display = "none";
+      detailRecord = null;
+    }
+
+    document
+      .getElementById("btnDetailClose")
+      .addEventListener("click", closeDetailModal);
+
+    document
+      .getElementById("btnDetailEdit")
+      .addEventListener("click", () => {
+        const target = detailRecord;
+
+        closeDetailModal();
+
+        if (target) {
+          openRecordModal(target);
+        }
+      });
+
+    document
+      .getElementById("btnDetailDelete")
+      .addEventListener("click", () => {
+        const target = detailRecord;
+
+        if (!target) {
+          return;
+        }
+
+        if (confirm("この記録を削除しますか？")) {
+          closeDetailModal();
+          deleteRecord(target);
+        }
+      });
+
+    /*
+     * ========================================
      * 記録削除
      * ========================================
      */
 
     async function deleteRecord(record) {
+      const personal = records.find((item) => {
+        return item.id === record.id;
+      });
+
+      const inGroup = groupIds.has(record.id);
+
       records = records.filter((item) => {
         return item.id !== record.id;
       });
+
+      groupRecords = groupRecords.filter((item) => {
+        return item.id !== record.id;
+      });
+
+      groupIds.delete(record.id);
 
       saveRecordsLocally();
       renderMarkers();
@@ -1146,7 +1914,7 @@
          * 新しい記録はrecord.idを使用します。
          */
         const documentId =
-          record._firestoreDocId || record.id;
+          (personal && personal._firestoreDocId) || record.id;
 
         await db
           .collection("users")
@@ -1154,6 +1922,12 @@
           .collection("records")
           .doc(documentId)
           .delete();
+
+        if (currentGroupId && inGroup) {
+          await groupRecordsRef(currentGroupId)
+            .doc(record.id)
+            .delete();
+        }
       } catch (error) {
         console.error(
           "Firestoreからの削除エラー:",
@@ -1189,6 +1963,7 @@
             ? "🔘"
             : "💰";
 
+        updateLegend();
         renderMarkers();
       });
 
@@ -1261,7 +2036,7 @@
         if (hasInvalidValue) {
           alert(
             "境界金額・迎車料金を正しく入力してください。\n" +
-            "「境界1 < 境界2」にする必要があります。"
+            "「赤／黄の境界 < 黄／緑の境界」にする必要があります。"
           );
           return;
         }
@@ -1276,77 +2051,73 @@
 
         settingsModal.style.display = "none";
 
+        updateLegend();
         renderMarkers();
       });
 
     /*
      * ========================================
-     * 時間帯フィルター
+     * 時間帯スライダー
      * ========================================
      */
 
-    const filterModal =
-      document.getElementById("filterModal");
+    const timeSlider = document.getElementById("timeSlider");
+    const timeLabel = document.getElementById("timeLabel");
 
-    const filterStartSelect =
-      document.getElementById("filterStart");
+    function formatMinute(minute) {
+      const normalized = ((minute % 1440) + 1440) % 1440;
+      const hour = Math.floor(normalized / 60);
+      const min = normalized % 60;
 
-    const filterEndSelect =
-      document.getElementById("filterEnd");
-
-    for (let hour = 0; hour < 24; hour++) {
-      const startOption =
-        document.createElement("option");
-
-      startOption.value = String(hour);
-      startOption.textContent = `${hour}時`;
-
-      filterStartSelect.appendChild(startOption);
-
-      const endOption =
-        document.createElement("option");
-
-      endOption.value = String(hour);
-      endOption.textContent = `${hour}時`;
-
-      filterEndSelect.appendChild(endOption);
+      return (
+        String(hour).padStart(2, "0") +
+        ":" +
+        String(min).padStart(2, "0")
+      );
     }
 
-    filterStartSelect.value = "0";
-    filterEndSelect.value = "23";
+    function updateTimeLabel() {
+      if (filterMinute === null) {
+        timeLabel.textContent = "🕒 全時間帯を表示";
+        return;
+      }
+
+      timeLabel.textContent =
+        `🕒 ${formatMinute(filterMinute)} の前後30分` +
+        `（${formatMinute(filterMinute - 30)}〜` +
+        `${formatMinute(filterMinute + 30)}）`;
+    }
+
+    function applyTimeFilter(minute) {
+      filterMinute = minute;
+      updateTimeLabel();
+      renderMarkers();
+    }
+
+    timeSlider.addEventListener("input", () => {
+      applyTimeFilter(Number.parseInt(timeSlider.value, 10));
+    });
 
     document
-      .getElementById("btnFilter")
+      .getElementById("btnTimeNow")
       .addEventListener("click", () => {
-        filterModal.style.display = "flex";
+        const now = new Date();
+
+        const minute =
+          Math.round(
+            (now.getHours() * 60 + now.getMinutes()) / 5
+          ) * 5;
+
+        const clamped = Math.min(minute, 1435);
+
+        timeSlider.value = String(clamped);
+        applyTimeFilter(clamped);
       });
 
     document
-      .getElementById("btnApplyFilter")
+      .getElementById("btnTimeClear")
       .addEventListener("click", () => {
-        filterRange = {
-          start: Number.parseInt(
-            filterStartSelect.value,
-            10
-          ),
-          end: Number.parseInt(
-            filterEndSelect.value,
-            10
-          )
-        };
-
-        filterModal.style.display = "none";
-
-        renderMarkers();
-      });
-
-    document
-      .getElementById("btnClearFilter")
-      .addEventListener("click", () => {
-        filterRange = null;
-        filterModal.style.display = "none";
-
-        renderMarkers();
+        applyTimeFilter(null);
       });
 
     /*
@@ -1365,6 +2136,23 @@
           await auth.signInWithPopup(provider);
         } catch (error) {
           console.error("ログインエラー:", error);
+
+          /* ポップアップが使えない環境では画面遷移方式に切り替える */
+          if (
+            error.code === "auth/popup-blocked" ||
+            error.code === "auth/operation-not-supported-in-this-environment"
+          ) {
+            try {
+              await auth.signInWithRedirect(provider);
+              return;
+            } catch (redirectError) {
+              console.error(redirectError);
+            }
+          }
+
+          if (error.code === "auth/popup-closed-by-user") {
+            return;
+          }
 
           alert(
             "ログインに失敗しました。\n" +
@@ -1406,22 +2194,36 @@
           `${user.displayName || user.email || "ユーザー"} でログイン中`;
 
         await loadRecordsFromFirestore();
+
+        startGroupListener();
       } else {
         loginButton.style.display = "inline-block";
         logoutButton.style.display = "none";
         userInfo.textContent = "";
 
+        stopGroupListener();
+        groupRecords = [];
+        groupIds = new Set();
+
         records = loadLocalRecords();
         renderMarkers();
       }
+
+      updateGroupUI();
     });
 
     /*
      * 最初はゲスト用の端末データを表示します。
      * ログイン状態の確認後、必要に応じて再読み込みされます。
+     * ログインしなくても、記録は端末内に保存して使えます。
      */
     records = loadLocalRecords();
     renderMarkers();
+    updateLegend();
+    updateGroupUI();
+
+    /* 入力途中でページが再読み込みされていたら復元する */
+    restoreDraft();
   </script>
 </body>
 </html>
