@@ -113,6 +113,26 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     }
 
+    /* 小さくした状態：ラベルと開くボタンだけ */
+    #timeBar.collapsed {
+      right: auto;
+
+      max-width: calc(100% - 60px);
+      padding: 4px 6px 4px 10px;
+    }
+
+    #timeBar.collapsed #timeBarBody,
+    #timeBar.collapsed #btnTimeNow,
+    #timeBar.collapsed #btnTimeClear {
+      display: none;
+    }
+
+    #timeBar.collapsed #timeLabel {
+      overflow: hidden;
+
+      text-overflow: ellipsis;
+    }
+
     #timeBarTop {
       display: flex;
       align-items: center;
@@ -263,6 +283,27 @@
     #btnOnlyMine {
       bottom: 180px;
       left: 15px;
+
+      flex-direction: column;
+      width: auto;
+      min-width: 50px;
+      padding: 0 16px;
+
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 1.25;
+
+      border-radius: 25px;
+    }
+
+    #btnOnlyMine .only-state {
+      font-size: 11px;
+      font-weight: normal;
+    }
+
+    #btnOnlyMine.active {
+      color: #fff;
+      background: #1565c0;
     }
 
     #btnAmountMode {
@@ -645,8 +686,10 @@
       <div id="timeLabel">🕒 全時間帯を表示</div>
       <button id="btnTimeNow" type="button">いま</button>
       <button id="btnTimeClear" type="button">解除</button>
+      <button id="btnTimeToggle" type="button" title="小さくする">▲</button>
     </div>
 
+    <div id="timeBarBody">
     <div id="timeGuide"></div>
 
     <input
@@ -667,6 +710,7 @@
       <button type="button" class="day-btn" data-day="5">金</button>
       <button type="button" class="day-btn sat" data-day="6">土</button>
       <button type="button" class="day-btn sun" data-day="0">日</button>
+    </div>
     </div>
   </div>
 
@@ -702,7 +746,8 @@
     type="button"
     title="自分の記録だけ表示"
   >
-    🙋
+    <span>🙋 自分のみ</span>
+    <span class="only-state" id="onlyMineState">OFF</span>
   </button>
 
   <button
@@ -2324,6 +2369,9 @@
     function updateOnlyMineUI() {
       btnOnlyMine.classList.toggle("active", onlyMine);
 
+      document.getElementById("onlyMineState").textContent =
+        onlyMine ? "ON" : "OFF";
+
       btnOnlyMine.title = onlyMine
         ? "フレンドの記録も表示する"
         : "自分の記録だけ表示";
@@ -2370,6 +2418,7 @@
           }
 
           updateDayUI();
+          updateTimeLabel();
           renderMarkers();
         });
       });
@@ -2442,13 +2491,44 @@
       return AMOUNT_COLORS.high;
     }
 
+    /*
+     * 地図の拡大率に合わせてマークの大きさを変える。
+     * 引きで見るほど小さく、寄るほど大きくなる。
+     */
+    function getMarkerSize() {
+      const zoom = Math.round(map.getZoom());
+
+      if (zoom >= 17) {
+        return 32;
+      }
+
+      if (zoom === 16) {
+        return 27;
+      }
+
+      if (zoom === 15) {
+        return 22;
+      }
+
+      if (zoom === 14) {
+        return 16;
+      }
+
+      return 11;
+    }
+
     function createDivIcon(record) {
       /* 自分の記録は白い枠、フレンドの記録はフレンドごとの色の枠 */
       const borderColor = isOwnRecord(record)
         ? "#fff"
         : friendColor(record.uid);
 
-      let html = "";
+      const size = getMarkerSize();
+
+      /* 小さいマークでもタップしやすいよう、当たり判定は最低24px確保 */
+      const hit = Math.max(size, 24);
+
+      let inner = "";
 
       if (mode === "normal") {
         const color =
@@ -2457,21 +2537,25 @@
         const icon =
           ICON_MAP[record.kikkake] || "?";
 
-        html = `
+        const border = size >= 16 ? 2 : 1;
+        const showIcon = size >= 22;
+
+        inner = `
           <div style="
             display:flex;
             align-items:center;
             justify-content:center;
-            width:32px;
-            height:32px;
+            box-sizing:border-box;
+            width:${size}px;
+            height:${size}px;
             color:#000;
-            font-size:16px;
+            font-size:${Math.round(size * 0.5)}px;
             background:${color};
-            border:2px solid ${borderColor};
+            border:${border}px solid ${borderColor};
             border-radius:50%;
-            box-shadow:0 1px 4px rgba(0,0,0,0.4);
+            box-shadow:0 1px 3px rgba(0,0,0,0.4);
           ">
-            ${icon}
+            ${showIcon ? icon : ""}
           </div>
         `;
       } else {
@@ -2479,26 +2563,46 @@
           getClassificationAmount(record)
         );
 
-        html = `
+        const border =
+          size >= 27 ? 3 : size >= 16 ? 2 : 1;
+
+        inner = `
           <div style="
-            width:32px;
-            height:32px;
             box-sizing:border-box;
+            width:${size}px;
+            height:${size}px;
             background:${color};
-            border:3px solid ${borderColor};
+            border:${border}px solid ${borderColor};
             border-radius:50%;
-            box-shadow:0 1px 4px rgba(0,0,0,0.5);
+            box-shadow:0 1px 3px rgba(0,0,0,0.5);
           "></div>
         `;
       }
 
+      const html = `
+        <div style="
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          width:${hit}px;
+          height:${hit}px;
+        ">
+          ${inner}
+        </div>
+      `;
+
       return L.divIcon({
         html,
         className: "",
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
+        iconSize: [hit, hit],
+        iconAnchor: [hit / 2, hit / 2]
       });
     }
+
+    /* 拡大・縮小したらマークの大きさを描き直す */
+    map.on("zoomend", () => {
+      renderMarkers();
+    });
 
     function updateLegend() {
       const legend = document.getElementById("amountLegend");
@@ -2901,7 +3005,38 @@
       );
     }
 
+    const timeBar = document.getElementById("timeBar");
+    const TIMEBAR_KEY = "taxi_timebar_collapsed";
+    const DAY_LABELS = { 1: "月", 2: "火", 3: "水", 4: "木", 5: "金", 6: "土", 0: "日" };
+
     function updateTimeLabel() {
+      const collapsed = timeBar.classList.contains("collapsed");
+
+      if (collapsed) {
+        /* 小さい表示では、絞り込み中の内容を短く見せる */
+        const parts = [];
+
+        if (filterMinute !== null) {
+          parts.push(`${formatMinute(filterMinute)} ±30分`);
+        }
+
+        const days = [1, 2, 3, 4, 5, 6, 0]
+          .filter((day) => filterDays.has(day))
+          .map((day) => DAY_LABELS[day])
+          .join("");
+
+        if (days) {
+          parts.push(days);
+        }
+
+        timeLabel.textContent =
+          parts.length > 0
+            ? `🕒 ${parts.join("・")}`
+            : "🕒 絞り込みなし";
+
+        return;
+      }
+
       if (filterMinute === null) {
         timeLabel.textContent = "🕒 全時間帯を表示";
         return;
@@ -2912,6 +3047,29 @@
         `（${formatMinute(filterMinute - 30)}〜` +
         `${formatMinute(filterMinute + 30)}）`;
     }
+
+    function setTimeBarCollapsed(collapsed) {
+      timeBar.classList.toggle("collapsed", collapsed);
+
+      const toggle = document.getElementById("btnTimeToggle");
+
+      toggle.textContent = collapsed ? "▼" : "▲";
+      toggle.title = collapsed ? "開く" : "小さくする";
+
+      localStorage.setItem(TIMEBAR_KEY, collapsed ? "1" : "0");
+
+      updateTimeLabel();
+    }
+
+    document
+      .getElementById("btnTimeToggle")
+      .addEventListener("click", () => {
+        setTimeBarCollapsed(
+          !timeBar.classList.contains("collapsed")
+        );
+      });
+
+    setTimeBarCollapsed(localStorage.getItem(TIMEBAR_KEY) === "1");
 
     function applyTimeFilter(minute) {
       filterMinute = minute;
