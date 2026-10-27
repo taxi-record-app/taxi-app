@@ -18,6 +18,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="タクシー記録">
 
+  <!-- 起動を速くするため、先に接続だけ済ませておく -->
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://www.gstatic.com">
+  <link rel="preconnect" href="https://a.tile.openstreetmap.org">
+  <link rel="preconnect" href="https://b.tile.openstreetmap.org">
+  <link rel="preconnect" href="https://c.tile.openstreetmap.org">
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+
   <!-- Leaflet -->
   <link
     rel="stylesheet"
@@ -48,7 +56,7 @@
 
     /* 背景地図の色を落として、マークを見やすくする（マークには影響しない） */
     #map .leaflet-tile-pane {
-      filter: grayscale(50%) brightness(1.08) contrast(0.88);
+      filter: grayscale(75%) brightness(1.08) contrast(0.88);
     }
 
     /* ログイン表示 */
@@ -439,6 +447,116 @@
       border-radius: 6px;
     }
 
+    /* 入力画面の見出し行（右上に悪天候チェック） */
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+
+      margin-bottom: 4px;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+    }
+
+    .modal-box .weather-check {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      margin: 0;
+      padding: 6px 10px;
+
+      color: #333;
+      font-size: 14px;
+      white-space: nowrap;
+
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .modal-box .weather-check input {
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      padding: 0;
+
+      accent-color: #2196f3;
+    }
+
+    /* 日時欄を中央寄せ（スマホで右に寄るのを防ぐ） */
+    #inputDateTime {
+      display: block;
+      min-height: 40px;
+
+      text-align: center;
+      text-align-last: center;
+    }
+
+    #inputDateTime::-webkit-date-and-time-value {
+      min-width: 0;
+      margin: 0 auto;
+
+      text-align: center;
+    }
+
+    /* 料金表示（入力はテンキーで行う） */
+    #inputRyoukin {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: right;
+
+      background: #fafafa;
+      pointer-events: none;
+    }
+
+    /* 入力画面は高さに余裕を持たせ、テンキーが収まるようにする */
+    #recordModal .modal-box {
+      max-height: 92vh;
+      max-height: 92dvh;
+    }
+
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+
+      margin-top: 8px;
+    }
+
+    .numpad button {
+      height: 46px;
+
+      color: #222;
+      font-size: 22px;
+      font-weight: bold;
+
+      background: #f1f1f1;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+
+      cursor: pointer;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .numpad button:active {
+      background: #bbdefb;
+    }
+
+    .numpad .key-back {
+      color: #c62828;
+    }
+
     .modal-note {
       margin: 10px 0 0;
 
@@ -518,7 +636,7 @@
 
     .detail-row span {
       display: inline-block;
-      width: 5.5em;
+      width: 7em;
 
       color: #666;
       font-size: 13px;
@@ -553,6 +671,34 @@
     }
 
     #dayRow .day-btn.selected {
+      color: #fff;
+      font-weight: bold;
+
+      background: #2196f3;
+      border-color: #2196f3;
+    }
+
+    /* 悪天候フィルター（小さめ） */
+    #weatherRow {
+      display: flex;
+      gap: 3px;
+
+      margin-top: 4px;
+    }
+
+    #weatherRow .weather-btn {
+      flex: 1;
+
+      padding: 3px 0;
+
+      font-size: 11px;
+
+      background: #f1f1f1;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    #weatherRow .weather-btn.selected {
       color: #fff;
       font-weight: bold;
 
@@ -717,6 +863,12 @@
       <button type="button" class="day-btn sat" data-day="6">土</button>
       <button type="button" class="day-btn sun" data-day="0">日</button>
     </div>
+
+    <div id="weatherRow">
+      <button type="button" class="weather-btn selected" data-weather="all">天候：全部</button>
+      <button type="button" class="weather-btn" data-weather="bad">☔ 悪天候</button>
+      <button type="button" class="weather-btn" data-weather="normal">悪天候なし</button>
+    </div>
     </div>
   </div>
 
@@ -771,7 +923,20 @@
     type="button"
     title="現在地へ移動"
   >
-    🎯
+    <svg
+      viewBox="0 0 24 24"
+      width="26"
+      height="26"
+      aria-hidden="true"
+    >
+      <path
+        d="M3 11.5 21 3l-8.5 18-2-7.5z"
+        fill="#2196f3"
+        stroke="#2196f3"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+      />
+    </svg>
   </button>
 
   <button
@@ -795,9 +960,16 @@
   <!-- 記録入力・編集モーダル -->
   <div id="recordModal" class="modal-overlay">
     <div class="modal-box">
-      <h3 id="recordModalTitle">乗車記録の入力</h3>
+      <div class="modal-head">
+        <h3 id="recordModalTitle">乗車記録の入力</h3>
 
-      <label>乗り方</label>
+        <label class="weather-check">
+          <input type="checkbox" id="inputBadWeather">
+          <span>悪天候</span>
+        </label>
+      </div>
+
+      <label>前回降車から</label>
 
       <div class="choice-group" id="norikataGroup">
         <div class="choice-btn" data-value="すぐ">🟢 すぐ</div>
@@ -805,23 +977,45 @@
         <div class="choice-btn" data-value="おそい">🔴 おそい</div>
       </div>
 
-      <label>きっかけ</label>
+      <label>乗車方法</label>
 
       <div class="choice-group" id="kikkakeGroup">
         <div class="choice-btn" data-value="手上げ">✋ 手上げ</div>
-        <div class="choice-btn" data-value="GO">📱 GO</div>
+        <div class="choice-btn" data-value="アプリ">📱 アプリ</div>
         <div class="choice-btn" data-value="無線">📻 無線</div>
       </div>
 
-      <label for="inputRyoukin">料金（円）</label>
+      <label>料金（円）</label>
       <input
-        type="number"
+        type="text"
         id="inputRyoukin"
-        min="0"
-        step="1"
-        inputmode="numeric"
-        placeholder="例：1500"
+        readonly
+        tabindex="-1"
+        inputmode="none"
+        autocomplete="off"
+        placeholder="0"
       >
+
+      <!-- 画面内テンキー：端末のキーボードは出さない -->
+      <div class="numpad" id="numpad">
+        <button type="button" data-key="7">7</button>
+        <button type="button" data-key="8">8</button>
+        <button type="button" data-key="9">9</button>
+        <button type="button" data-key="4">4</button>
+        <button type="button" data-key="5">5</button>
+        <button type="button" data-key="6">6</button>
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2</button>
+        <button type="button" data-key="3">3</button>
+        <button type="button" data-key="0">0</button>
+        <button type="button" data-key="00">00</button>
+        <button
+          type="button"
+          class="key-back"
+          data-key="back"
+          aria-label="一文字戻る"
+        >×</button>
+      </div>
 
       <label for="inputDateTime">日時</label>
       <input type="datetime-local" id="inputDateTime">
@@ -1055,6 +1249,7 @@
     localStorage.removeItem("taxi_group_name");
 
     let filterDays = new Set();
+    let filterWeather = "all";
     let onlyMine = localStorage.getItem(ONLY_MINE_KEY) === "1";
 
     let myProfile = null;
@@ -1079,11 +1274,26 @@
      * ========================================
      */
 
+    const LAST_UID_KEY = "taxi_last_uid";
+    let authResolved = false;
+
     function getRecordsStorageKey() {
       const user = auth.currentUser;
 
       if (user) {
         return `taxi_records_${user.uid}`;
+      }
+
+      /*
+       * ログイン状態の確認が終わる前は、前回ログインしていた人の
+       * 端末データを先に表示して、起動直後から記録が見えるようにする。
+       */
+      if (!authResolved) {
+        const lastUid = localStorage.getItem(LAST_UID_KEY);
+
+        if (lastUid) {
+          return `taxi_records_${lastUid}`;
+        }
       }
 
       return "taxi_records_guest";
@@ -1136,8 +1346,14 @@
         time: record.time,
         norikata: record.norikata,
         kikkake: record.kikkake,
-        ryoukin: record.ryoukin
+        ryoukin: record.ryoukin,
+        badWeather: record.badWeather === true
       };
+    }
+
+    /* 以前「GO」で保存した記録は「アプリ」として扱う */
+    function normalizeKikkake(value) {
+      return value === "GO" ? "アプリ" : value;
     }
 
     function isOwnRecord(record) {
@@ -1215,6 +1431,35 @@
 
     restoreRecentView();
 
+    /*
+     * 前回の現在地を覚えておき、30分以上あいた場合でも
+     * 起動直後から近くの地図を読み込む（GPSの確定を待たない）。
+     */
+    const LAST_POS_KEY = "taxi_last_pos";
+    let lastPosSavedAt = 0;
+
+    function restoreLastPosition() {
+      if (!firstFix) {
+        return;
+      }
+
+      try {
+        const pos = JSON.parse(localStorage.getItem(LAST_POS_KEY));
+
+        if (
+          pos &&
+          Number.isFinite(pos.lat) &&
+          Number.isFinite(pos.lng)
+        ) {
+          map.setView([pos.lat, pos.lng], 17, { animate: false });
+        }
+      } catch (error) {
+        console.error("前回位置の復元エラー:", error);
+      }
+    }
+
+    restoreLastPosition();
+
     function startWatchingLocation() {
       if (!navigator.geolocation) {
         console.warn("この端末は位置情報に対応していません。");
@@ -1240,6 +1485,17 @@
       } = position.coords;
 
       const latlng = [latitude, longitude];
+
+      const nowMs = Date.now();
+
+      if (nowMs - lastPosSavedAt > 5000) {
+        lastPosSavedAt = nowMs;
+
+        localStorage.setItem(
+          LAST_POS_KEY,
+          JSON.stringify({ lat: latitude, lng: longitude })
+        );
+      }
 
       if (!currentLocationMarker) {
         currentLocationMarker = L.circleMarker(latlng, {
@@ -1309,6 +1565,29 @@
     const recordModal = document.getElementById("recordModal");
     const inputRyoukin = document.getElementById("inputRyoukin");
     const inputDateTime = document.getElementById("inputDateTime");
+    const inputBadWeather = document.getElementById("inputBadWeather");
+
+    /*
+     * 悪天候のチェックは、自分で外すまで保持する。
+     * （新しい記録を開くたびに前回の状態を引き継ぐ）
+     */
+    const BAD_WEATHER_KEY = "taxi_bad_weather";
+
+    function getSavedBadWeather() {
+      return localStorage.getItem(BAD_WEATHER_KEY) === "1";
+    }
+
+    inputBadWeather.addEventListener("change", () => {
+      /* 過去の記録の編集中は、その記録だけに反映する */
+      if (!editingRecord) {
+        localStorage.setItem(
+          BAD_WEATHER_KEY,
+          inputBadWeather.checked ? "1" : "0"
+        );
+      }
+
+      saveDraft();
+    });
 
     function toLocalInputValue(date) {
       const shifted = new Date(
@@ -1350,6 +1629,32 @@
       });
 
     inputRyoukin.addEventListener("input", saveDraft);
+
+    /* テンキー：押した数字をそのまま料金に入力する */
+    const MAX_RYOUKIN_DIGITS = 7;
+
+    document
+      .querySelectorAll("#numpad button")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          const key = button.dataset.key;
+          let value = inputRyoukin.value;
+
+          if (key === "back") {
+            value = value.slice(0, -1);
+          } else {
+            /* 先頭の0は除く（「00」だけ押したときは「0」） */
+            value = (value + key).replace(/^0+(?=\d)/, "");
+
+            if (value.length > MAX_RYOUKIN_DIGITS) {
+              return;
+            }
+          }
+
+          inputRyoukin.value = value;
+          saveDraft();
+        });
+      });
     inputDateTime.addEventListener("input", saveDraft);
     inputDateTime.addEventListener("change", saveDraft);
 
@@ -1371,6 +1676,7 @@
           norikata: selectedNorikata,
           kikkake: selectedKikkake,
           ryoukin: inputRyoukin.value,
+          badWeather: inputBadWeather.checked,
           dateTime: inputDateTime.value,
           view: getCurrentView(),
           savedAt: Date.now()
@@ -1390,8 +1696,9 @@
 
       if (record) {
         selectedNorikata = record.norikata;
-        selectedKikkake = record.kikkake;
+        selectedKikkake = normalizeKikkake(record.kikkake);
         inputRyoukin.value = record.ryoukin;
+        inputBadWeather.checked = record.badWeather === true;
 
         const date = new Date(record.time);
 
@@ -1402,6 +1709,7 @@
         selectedNorikata = null;
         selectedKikkake = null;
         inputRyoukin.value = "";
+        inputBadWeather.checked = getSavedBadWeather();
         inputDateTime.value = toLocalInputValue(new Date());
       }
 
@@ -1467,8 +1775,12 @@
         editingRecord ? "乗車記録の編集" : "乗車記録の入力";
 
       selectedNorikata = draft.norikata;
-      selectedKikkake = draft.kikkake;
+      selectedKikkake = normalizeKikkake(draft.kikkake);
       inputRyoukin.value = draft.ryoukin || "";
+      inputBadWeather.checked =
+        typeof draft.badWeather === "boolean"
+          ? draft.badWeather
+          : getSavedBadWeather();
       inputDateTime.value = draft.dateTime || "";
 
       selectChoice("norikataGroup", selectedNorikata);
@@ -1510,7 +1822,7 @@
         }
 
         if (!selectedNorikata || !selectedKikkake) {
-          alert("乗り方ときっかけを選択してください。");
+          alert("「前回降車から」と「乗車方法」を選択してください。");
           return;
         }
 
@@ -1542,7 +1854,8 @@
             time: date.toISOString(),
             norikata: selectedNorikata,
             kikkake: selectedKikkake,
-            ryoukin
+            ryoukin,
+            badWeather: inputBadWeather.checked
           };
 
           closeRecordModal();
@@ -1562,7 +1875,8 @@
           time: date.toISOString(),
           norikata: selectedNorikata,
           kikkake: selectedKikkake,
-          ryoukin
+          ryoukin,
+          badWeather: inputBadWeather.checked
         };
 
         records.push(record);
@@ -2429,6 +2743,31 @@
         });
       });
 
+    /* ---------- 悪天候フィルター ---------- */
+
+    function updateWeatherUI() {
+      document
+        .querySelectorAll("#weatherRow .weather-btn")
+        .forEach((button) => {
+          button.classList.toggle(
+            "selected",
+            button.dataset.weather === filterWeather
+          );
+        });
+    }
+
+    document
+      .querySelectorAll("#weatherRow .weather-btn")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          filterWeather = button.dataset.weather;
+
+          updateWeatherUI();
+          updateTimeLabel();
+          renderMarkers();
+        });
+      });
+
     /* 自分の記録 + 表示中のフレンドの記録 */
     function getDisplayRecords() {
       const result = [...records];
@@ -2464,6 +2803,7 @@
 
     const ICON_MAP = {
       "手上げ": "✋",
+      "アプリ": "📱",
       "GO": "📱",
       "無線": "📻"
     };
@@ -2634,6 +2974,14 @@
      * どちらも未選択なら全部表示します。
      */
     function passesFilter(record) {
+      if (filterWeather === "bad" && record.badWeather !== true) {
+        return false;
+      }
+
+      if (filterWeather === "normal" && record.badWeather === true) {
+        return false;
+      }
+
       if (filterMinute === null && filterDays.size === 0) {
         return true;
       }
@@ -2724,9 +3072,17 @@
       body.textContent = "";
 
       addDetailRow(body, "日時", dateText);
-      addDetailRow(body, "乗り方", record.norikata);
-      addDetailRow(body, "きっかけ", record.kikkake);
+      addDetailRow(body, "前回降車から", record.norikata);
+      addDetailRow(
+        body,
+        "乗車方法",
+        normalizeKikkake(record.kikkake)
+      );
       addDetailRow(body, "料金", `${record.ryoukin}円`);
+
+      if (record.badWeather === true) {
+        addDetailRow(body, "悪天候", "あり");
+      }
 
       const own = isOwnRecord(record);
 
@@ -3035,6 +3391,12 @@
           parts.push(days);
         }
 
+        if (filterWeather === "bad") {
+          parts.push("☔悪天候");
+        } else if (filterWeather === "normal") {
+          parts.push("悪天候なし");
+        }
+
         timeLabel.textContent =
           parts.length > 0
             ? `🕒 ${parts.join("・")}`
@@ -3166,6 +3528,14 @@
       });
 
     auth.onAuthStateChanged(async (user) => {
+      authResolved = true;
+
+      if (user) {
+        localStorage.setItem(LAST_UID_KEY, user.uid);
+      } else {
+        localStorage.removeItem(LAST_UID_KEY);
+      }
+
       const loginButton =
         document.getElementById("btnLogin");
 
@@ -3214,3 +3584,4 @@
   </script>
 </body>
 </html>
+
