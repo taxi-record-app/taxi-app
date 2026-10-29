@@ -824,7 +824,7 @@
      * ========================================
      */
     :root {
-      --tabbar-h: calc(56px + env(safe-area-inset-bottom, 0px));
+      --tabbar-h: calc(74px + env(safe-area-inset-bottom, 0px));
     }
 
     /* 地図の著作権表示がタブに隠れないようにする */
@@ -859,7 +859,7 @@
       gap: 2px;
 
       color: #777;
-      font-size: 11px;
+      font-size: 12px;
 
       background: none;
       border: none;
@@ -870,7 +870,7 @@
     }
 
     .tab-btn .tab-ico {
-      font-size: 22px;
+      font-size: 28px;
       line-height: 1;
     }
 
@@ -1228,6 +1228,129 @@
       font-size: 13px;
       text-align: center;
     }
+  
+    /* ----- 履歴の追加分 ----- */
+    .mid-value.small {
+      font-size: 22px;
+    }
+
+    #histCaption {
+      min-height: 24px;
+      margin-top: 10px;
+
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .hist-edit-row {
+      display: flex;
+      justify-content: center;
+
+      margin-top: 8px;
+    }
+
+    .small-link {
+      padding: 6px 12px;
+
+      color: #1565c0;
+      font-size: 12px;
+
+      background: #e3f2fd;
+      border: none;
+      border-radius: 8px;
+
+      cursor: pointer;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      margin: 20px 2px 8px;
+    }
+
+    .section-head .section-title {
+      margin: 0;
+    }
+
+    .rec-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      margin-bottom: 8px;
+      padding: 10px 12px;
+
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    }
+
+    .rec-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rec-date {
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .rec-sub {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .rec-sales {
+      font-size: 16px;
+      font-weight: bold;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rec-edit {
+      padding: 7px 12px;
+
+      color: #333;
+      font-size: 13px;
+
+      background: #f1f1f1;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+
+      cursor: pointer;
+    }
+
+    .dur-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dur-row input {
+      text-align: center;
+    }
+
+    #shiftStart,
+    #periodStart,
+    #periodEnd {
+      display: block;
+      min-height: 40px;
+
+      text-align: center;
+      text-align-last: center;
+    }
+
+    #shiftStart::-webkit-date-and-time-value,
+    #periodStart::-webkit-date-and-time-value,
+    #periodEnd::-webkit-date-and-time-value {
+      min-width: 0;
+      margin: 0 auto;
+
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -1374,7 +1497,6 @@
   <div id="viewBiz" class="app-view">
     <div class="view-header">
       <h2>営業情報</h2>
-      <button type="button" class="view-gear" data-open-settings>⚙ 設定</button>
     </div>
 
     <div class="view-body">
@@ -1421,8 +1543,8 @@
 
     <div class="view-body" id="histBody">
       <div class="seg" id="histSeg">
-        <button type="button" data-mode="week" class="selected">1週間</button>
-        <button type="button" data-mode="month">1か月</button>
+        <button type="button" data-mode="month" class="selected">1か月</button>
+        <button type="button" data-mode="year">1年</button>
       </div>
 
       <div class="hist-nav">
@@ -1436,18 +1558,24 @@
         <button type="button" id="btnHistNext" aria-label="次へ">▶</button>
       </div>
 
-      <div class="card" style="margin-top: 12px;">
-        <div class="card-label">期間の売上合計</div>
+      <div class="hist-edit-row">
+        <button type="button" id="btnPeriodEdit" class="small-link">
+          ✎ この月の開始日・締め日を編集
+        </button>
+      </div>
+
+      <div class="card" style="margin-top: 10px;">
+        <div class="card-label" id="histTotalLabel">この月の売上合計</div>
         <div id="histTotal" class="big-value">¥0</div>
 
         <div class="card-row" style="margin-top: 8px;">
           <div>
             <div class="card-label">乗車回数</div>
-            <div class="mid-value" style="font-size: 22px;" id="histCount">0回</div>
+            <div class="mid-value small" id="histCount">0回</div>
           </div>
           <div>
-            <div class="card-label">1日平均</div>
-            <div class="mid-value" style="font-size: 22px;" id="histAvg">¥0</div>
+            <div class="card-label" id="histAvgLabel">1出庫あたりの平均</div>
+            <div class="mid-value small" id="histAvg">¥0</div>
           </div>
         </div>
       </div>
@@ -1455,7 +1583,18 @@
       <div class="card" style="margin-top: 10px; padding: 12px 8px;">
         <div id="histChart"></div>
         <div id="histCaption"></div>
+        <div style="text-align: center;">
+          <button type="button" id="btnYearToMonth" class="small-link" style="display: none;">
+            この月の日別グラフを見る
+          </button>
+        </div>
       </div>
+
+      <div class="section-head">
+        <span class="section-title">稼働記録（直近5回）</span>
+        <button type="button" id="btnShiftAdd" class="small-link">＋ 勤務を追加</button>
+      </div>
+      <div id="recentList"></div>
 
       <div class="section-title">月ごとの合計売上</div>
       <div id="monthList"></div>
@@ -1474,6 +1613,55 @@
       <span class="tab-ico">📊</span><span>履歴</span>
     </button>
   </nav>
+
+  <!-- 稼働記録の編集・追加 -->
+  <div id="shiftModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="shiftModalTitle">稼働記録の編集</h3>
+
+      <label for="shiftStart">開始日時</label>
+      <input type="datetime-local" id="shiftStart">
+
+      <div id="shiftDurationBox">
+        <label>拘束時間</label>
+        <div class="dur-row">
+          <input type="number" id="shiftHours" min="0" max="48" step="1" inputmode="numeric">
+          <span>時間</span>
+          <input type="number" id="shiftMinutes" min="0" max="59" step="1" inputmode="numeric">
+          <span>分</span>
+        </div>
+        <p class="modal-note" id="shiftEndNote"></p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-save" id="btnShiftSave" type="button">保存</button>
+        <button class="btn-danger" id="btnShiftDelete" type="button">削除</button>
+        <button class="btn-cancel" id="btnShiftCancel" type="button">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 月の期間の編集 -->
+  <div id="periodModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>期間の編集</h3>
+      <div id="periodModalName" style="font-weight: bold;"></div>
+
+      <label for="periodStart">開始日</label>
+      <input type="date" id="periodStart">
+
+      <label for="periodEnd">終了日（締め日）</label>
+      <input type="date" id="periodEnd">
+
+      <p class="modal-note" id="periodDefaultNote"></p>
+
+      <div class="modal-actions">
+        <button class="btn-save" id="btnPeriodSave" type="button">保存</button>
+        <button class="btn-danger" id="btnPeriodReset" type="button">標準に戻す</button>
+        <button class="btn-cancel" id="btnPeriodCancel" type="button">閉じる</button>
+      </div>
+    </div>
+  </div>
 
   <div id="recordModal" class="modal-overlay">
     <div class="modal-box">
@@ -1575,80 +1763,84 @@
   <!-- 設定モーダル -->
   <div id="settingsModal" class="modal-overlay">
     <div class="modal-box">
-      <h3>設定</h3>
+      <h3 id="settingsTitle">設定</h3>
 
-      <label for="settingBoundary1">
-        赤／黄の境界金額（円）
-      </label>
-      <input
-        type="number"
-        id="settingBoundary1"
-        min="0"
-        step="1"
-      >
+      <div data-scope="map">
+        <label for="settingBoundary1">
+          赤／黄の境界金額（円）
+        </label>
+        <input
+          type="number"
+          id="settingBoundary1"
+          min="0"
+          step="1"
+        >
 
-      <label for="settingBoundary2">
-        黄／緑の境界金額（円）
-      </label>
-      <input
-        type="number"
-        id="settingBoundary2"
-        min="0"
-        step="1"
-      >
+        <label for="settingBoundary2">
+          黄／緑の境界金額（円）
+        </label>
+        <input
+          type="number"
+          id="settingBoundary2"
+          min="0"
+          step="1"
+        >
 
-      <label for="settingPickupFee">迎車料金（円）</label>
-      <input
-        type="number"
-        id="settingPickupFee"
-        min="0"
-        step="1"
-      >
+        <label for="settingPickupFee">迎車料金（円）</label>
+        <input
+          type="number"
+          id="settingPickupFee"
+          min="0"
+          step="1"
+        >
 
-      <label for="settingClosingDay">月の締め日（月ごとの集計）</label>
-      <select id="settingClosingDay">
-        <option value="0">末日</option>
-        <option value="1">1日</option>
-        <option value="2">2日</option>
-        <option value="3">3日</option>
-        <option value="4">4日</option>
-        <option value="5">5日</option>
-        <option value="6">6日</option>
-        <option value="7">7日</option>
-        <option value="8">8日</option>
-        <option value="9">9日</option>
-        <option value="10">10日</option>
-        <option value="11">11日</option>
-        <option value="12">12日</option>
-        <option value="13">13日</option>
-        <option value="14">14日</option>
-        <option value="15">15日</option>
-        <option value="16">16日</option>
-        <option value="17">17日</option>
-        <option value="18">18日</option>
-        <option value="19">19日</option>
-        <option value="20">20日</option>
-        <option value="21">21日</option>
-        <option value="22">22日</option>
-        <option value="23">23日</option>
-        <option value="24">24日</option>
-        <option value="25">25日</option>
-        <option value="26">26日</option>
-        <option value="27">27日</option>
-        <option value="28">28日</option>
-      </select>
-      <p class="modal-note">
-        締め日の次の勤務から、次の1か月の集計を始めます。
-      </p>
+        <label for="settingDisplayName">フレンドに表示する名前</label>
+        <input
+          type="text"
+          id="settingDisplayName"
+          maxlength="20"
+          autocomplete="off"
+          placeholder="空欄ならGoogleの名前"
+        >
+      </div>
 
-      <label for="settingDisplayName">フレンドに表示する名前</label>
-      <input
-        type="text"
-        id="settingDisplayName"
-        maxlength="20"
-        autocomplete="off"
-        placeholder="空欄ならGoogleの名前"
-      >
+      <div data-scope="history" style="display: none;">
+        <label for="settingClosingDay">月の締め日（月ごとの集計）</label>
+        <select id="settingClosingDay">
+          <option value="0">末日</option>
+          <option value="1">1日</option>
+          <option value="2">2日</option>
+          <option value="3">3日</option>
+          <option value="4">4日</option>
+          <option value="5">5日</option>
+          <option value="6">6日</option>
+          <option value="7">7日</option>
+          <option value="8">8日</option>
+          <option value="9">9日</option>
+          <option value="10">10日</option>
+          <option value="11">11日</option>
+          <option value="12">12日</option>
+          <option value="13">13日</option>
+          <option value="14">14日</option>
+          <option value="15">15日</option>
+          <option value="16">16日</option>
+          <option value="17">17日</option>
+          <option value="18">18日</option>
+          <option value="19">19日</option>
+          <option value="20">20日</option>
+          <option value="21">21日</option>
+          <option value="22">22日</option>
+          <option value="23">23日</option>
+          <option value="24">24日</option>
+          <option value="25">25日</option>
+          <option value="26">26日</option>
+          <option value="27">27日</option>
+        </select>
+        <p class="modal-note">
+          例：10日締めなら、5/11〜6/10 が「5月分」になります。
+          月ごとに日付が違うときは、履歴の画面で月ごとに編集できます。
+        </p>
+      </div>
 
       <div class="modal-actions">
         <button class="btn-save" id="btnSaveSettings" type="button">
@@ -3821,7 +4013,11 @@
 
         document.getElementById(
           "settingClosingDay"
-        ).value = String(settings.closingDay || 0);
+        ).value = String(
+          settings.closingDay >= 1 && settings.closingDay <= 27
+            ? settings.closingDay
+            : 0
+        );
 
         document.getElementById(
           "settingDisplayName"
@@ -3880,7 +4076,7 @@
           boundary1 < 0 ||
           boundary2 < 0 ||
           pickupFee < 0 ||
-          !(closingDay >= 0 && closingDay <= 28) ||
+          !(closingDay >= 0 && closingDay <= 27) ||
           boundary1 >= boundary2;
 
         if (hasInvalidValue) {
@@ -3896,7 +4092,11 @@
           boundary1,
           boundary2,
           pickupFee,
-          closingDay
+          closingDay,
+          closingUpdatedAt:
+            closingDay !== (settings.closingDay || 0)
+              ? Date.now()
+              : settings.closingUpdatedAt || 0
         };
 
         saveSettings();
@@ -4205,45 +4405,75 @@
 
     const md = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
     const hm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    const mdw = (d) => `${md(d)}（${WEEK[d.getDay()]}）`;
 
-    /* 月曜始まりの週 */
-    const mondayOf = (d) =>
-      addDays(startOfDay(d), -((d.getDay() + 6) % 7));
+    function parseKey(key) {
+      const [y, m, d] = key.split("-").map(Number);
 
-    /* ---------- 勤務（営業開始〜営業終了）の保存 ---------- */
-
-    let shifts = [];
-
-    function shiftsKey() {
-      return getRecordsStorageKey().replace(
-        "taxi_records_",
-        "taxi_shifts_"
-      );
+      return new Date(y, m - 1, d);
     }
 
-    function loadShifts() {
-      try {
-        const raw = localStorage.getItem(shiftsKey());
-        const list = raw ? JSON.parse(raw) : [];
+    function toLocalInput(date) {
+      return `${dateKey(date)}T${hm(date)}`;
+    }
 
-        return Array.isArray(list)
-          ? list.filter((item) => item && item.start)
-          : [];
+    /* ---------- 端末への保存 ---------- */
+
+    let shifts = [];
+    let periodOv = {};
+
+    const keyFor = (prefix) =>
+      getRecordsStorageKey().replace("taxi_records_", prefix);
+
+    function readJson(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+
+        return raw ? JSON.parse(raw) : fallback;
       } catch (error) {
-        console.error("勤務データの読み込みエラー:", error);
-        return [];
+        console.error("端末データの読み込みエラー:", error);
+        return fallback;
       }
     }
 
-    function saveShifts() {
-      localStorage.setItem(shiftsKey(), JSON.stringify(shifts));
+    function loadShifts() {
+      const list = readJson(keyFor("taxi_shifts_"), []);
+
+      return Array.isArray(list)
+        ? list.filter((item) => item && item.id && item.start)
+        : [];
     }
 
+    function saveShifts() {
+      localStorage.setItem(
+        keyFor("taxi_shifts_"),
+        JSON.stringify(shifts)
+      );
+    }
+
+    function loadPeriods() {
+      const obj = readJson(keyFor("taxi_periods_"), {});
+
+      return obj && typeof obj === "object" && !Array.isArray(obj)
+        ? obj
+        : {};
+    }
+
+    function savePeriods() {
+      localStorage.setItem(
+        keyFor("taxi_periods_"),
+        JSON.stringify(periodOv)
+      );
+    }
+
+    /* 削除した勤務も「削除済み」として残す（他の端末に削除を伝えるため） */
+    const visibleShifts = () => shifts.filter((item) => !item.deleted);
+
     const activeShift = () =>
-      shifts.find((item) => !item.end) || null;
+      visibleShifts().find((item) => !item.end) || null;
 
     function lastShift() {
-      return shifts.reduce(
+      return visibleShifts().reduce(
         (latest, item) =>
           !latest || Date.parse(item.start) > Date.parse(latest.start)
             ? item
@@ -4252,58 +4482,290 @@
       );
     }
 
-    /* 自分の記録だけ（金額が数値のもの） */
-    function ownRecords() {
-      return records.filter(
-        (record) =>
-          isOwnRecord(record) &&
-          record.time &&
-          Number.isFinite(Number(record.ryoukin))
+    /* ---------- アカウントへの保存 ----------
+     * users/{自分のuid}/shifts/ に保存する。自分専用で、フレンドには共有しない。
+     * （勤務・期間の編集・締め日の設定を入れる）
+     */
+
+    let shiftErrorShown = false;
+    let shiftSyncing = false;
+    let lastShiftSync = 0;
+
+    function reportShiftError(error) {
+      console.error("営業情報のクラウド保存エラー:", error);
+
+      if (shiftErrorShown) {
+        return;
+      }
+
+      shiftErrorShown = true;
+
+      const denied =
+        error && error.code === "permission-denied"
+          ? "\nFirestoreのルールに、自分の shifts を読み書きする許可を追加してください。"
+          : "";
+
+      alert(
+        "営業情報を端末には保存しましたが、クラウドへの保存に失敗しました。" +
+        denied +
+        "\n" +
+        (error && error.message ? error.message : "")
       );
     }
 
-    /* ---------- 勤務日・締め日 ---------- */
+    const shiftsCollection = (user) =>
+      db.collection("users").doc(user.uid).collection("shifts");
+
+    async function pushDoc(id, data) {
+      const user = auth.currentUser;
+
+      if (!user) {
+        return;
+      }
+
+      try {
+        await shiftsCollection(user).doc(id).set(data);
+      } catch (error) {
+        reportShiftError(error);
+      }
+    }
+
+    const shiftDoc = (item) => ({
+      id: item.id,
+      kind: "shift",
+      start: item.start,
+      end: item.end || null,
+      updatedAt: item.updatedAt || 0,
+      deleted: !!item.deleted
+    });
+
+    const periodDoc = (item) => ({
+      id: `p_${item.key}`,
+      kind: "period",
+      key: item.key,
+      start: item.start,
+      end: item.end,
+      updatedAt: item.updatedAt || 0,
+      removed: !!item.removed
+    });
+
+    const pushShift = (item) => pushDoc(item.id, shiftDoc(item));
+    const pushPeriod = (item) => pushDoc(`p_${item.key}`, periodDoc(item));
+
+    function pushConfig() {
+      if (!(settings.closingUpdatedAt > 0)) {
+        return;
+      }
+
+      pushDoc("cfg", {
+        id: "cfg",
+        kind: "config",
+        closingDay: Number(settings.closingDay) || 0,
+        updatedAt: settings.closingUpdatedAt
+      });
+    }
+
+    /* 新しい方を採用。同じなら「終了済み」を優先 */
+    function isNewer(candidate, current) {
+      const a = candidate.updatedAt || 0;
+      const b = current.updatedAt || 0;
+
+      return a > b || (a === b && !current.end && !!candidate.end);
+    }
+
+    function mergeById(first, second) {
+      const merged = new Map();
+
+      [...first, ...second].forEach((item) => {
+        if (!item || !item.id) {
+          return;
+        }
+
+        const current = merged.get(item.id);
+
+        if (!current || isNewer(item, current)) {
+          merged.set(item.id, item);
+        }
+      });
+
+      return [...merged.values()];
+    }
+
+    async function syncShifts() {
+      const user = auth.currentUser;
+
+      if (!user || shiftSyncing) {
+        return;
+      }
+
+      shiftSyncing = true;
+
+      try {
+        const collection = shiftsCollection(user);
+        const snapshot = await collection.get();
+
+        if (auth.currentUser !== user) {
+          return;
+        }
+
+        const cloudShifts = [];
+        const cloudPeriods = [];
+        let cloudConfig = null;
+
+        snapshot.docs.forEach((doc) => {
+          const data = { ...doc.data(), id: doc.id };
+
+          if (data.kind === "period") {
+            cloudPeriods.push({ ...data, id: `p_${data.key}` });
+          } else if (data.kind === "config") {
+            cloudConfig = data;
+          } else {
+            cloudShifts.push(data);
+          }
+        });
+
+        /* 勤務 */
+        const cloudShiftMap = new Map(
+          cloudShifts.map((item) => [item.id, item])
+        );
+
+        shifts = mergeById(cloudShifts, shifts).filter(
+          (item) => item.start
+        );
+
+        saveShifts();
+
+        /* 期間の編集 */
+        const localPeriods = Object.values(periodOv).map((item) => ({
+          ...item,
+          id: `p_${item.key}`
+        }));
+
+        const cloudPeriodMap = new Map(
+          cloudPeriods.map((item) => [item.id, item])
+        );
+
+        const mergedPeriods = mergeById(cloudPeriods, localPeriods);
+
+        periodOv = {};
+
+        mergedPeriods.forEach((item) => {
+          periodOv[item.key] = {
+            key: item.key,
+            start: item.start,
+            end: item.end,
+            updatedAt: item.updatedAt || 0,
+            removed: !!item.removed
+          };
+        });
+
+        savePeriods();
+
+        /* 締め日 */
+        const localAt = settings.closingUpdatedAt || 0;
+        const cloudAt = cloudConfig ? cloudConfig.updatedAt || 0 : 0;
+
+        if (cloudAt > localAt) {
+          settings = {
+            ...settings,
+            closingDay: Number(cloudConfig.closingDay) || 0,
+            closingUpdatedAt: cloudAt
+          };
+
+          saveSettings();
+        }
+
+        refresh();
+
+        /* クラウドより新しい分を送る */
+        for (const item of shifts) {
+          const found = cloudShiftMap.get(item.id);
+
+          if (!found || isNewer(item, found)) {
+            await pushShift(item);
+          }
+        }
+
+        for (const item of mergedPeriods) {
+          const found = cloudPeriodMap.get(item.id);
+
+          if (!found || isNewer(item, found)) {
+            await pushPeriod(periodOv[item.key]);
+          }
+        }
+
+        if (localAt > cloudAt) {
+          await pushConfig();
+        }
+      } catch (error) {
+        reportShiftError(error);
+      } finally {
+        shiftSyncing = false;
+        lastShiftSync = Date.now();
+      }
+    }
+
+    /* アプリに戻ってきたとき、他の端末での操作を取り込む */
+    document.addEventListener("visibilitychange", () => {
+      if (
+        document.visibilityState === "visible" &&
+        Date.now() - lastShiftSync > 30000
+      ) {
+        syncShifts();
+      }
+    });
+
+    /* ---------- 集計の土台 ---------- */
+
+    function ownRecs() {
+      return records
+        .filter(
+          (record) =>
+            isOwnRecord(record) &&
+            record.time &&
+            Number.isFinite(Number(record.ryoukin))
+        )
+        .map((record) => ({
+          t: Date.parse(record.time),
+          v: Number(record.ryoukin)
+        }))
+        .filter((item) => Number.isFinite(item.t));
+    }
 
     function shiftRanges() {
-      return shifts.map((item) => ({
+      return visibleShifts().map((item) => ({
         s: Date.parse(item.start),
         e: item.end ? Date.parse(item.end) : Infinity
       }));
     }
 
     /*
-     * 記録がどの日の勤務か。
-     * 営業開始〜終了の間の記録は、開始した日の勤務として数える
-     * （日をまたぐ営業でも、開始日の売上になる）。
-     * 営業の記録がない時間の記録は、記録した日で数える。
+     * 日ごとの売上。営業開始〜終了の間の記録は、開始した日の売上にする
+     * （日をまたいでも1日にまとまる）。営業の記録がない時間の記録は、
+     * 記録した日の売上にする。
      */
-    function workDateOf(time, ranges) {
-      for (const range of ranges) {
-        if (time >= range.s && time <= range.e) {
-          return startOfDay(new Date(range.s));
-        }
-      }
-
-      return startOfDay(new Date(time));
-    }
-
     function buildDaily() {
       const ranges = shiftRanges();
       const byDay = new Map();
 
-      ownRecords().forEach((record) => {
-        const time = Date.parse(record.time);
+      ownRecs().forEach((rec) => {
+        const found = ranges.find(
+          (range) => rec.t >= range.s && rec.t <= range.e
+        );
 
-        if (!Number.isFinite(time)) {
-          return;
-        }
-
-        const date = workDateOf(time, ranges);
+        const date = startOfDay(new Date(found ? found.s : rec.t));
         const key = dateKey(date);
-        const entry = byDay.get(key) || { date, sales: 0, count: 0 };
 
-        entry.sales += Number(record.ryoukin);
+        const entry = byDay.get(key) || {
+          date,
+          sales: 0,
+          count: 0,
+          plain: false
+        };
+
+        entry.sales += rec.v;
         entry.count += 1;
+        entry.plain = entry.plain || !found;
 
         byDay.set(key, entry);
       });
@@ -4317,60 +4779,164 @@
       return startOfDay(active ? new Date(active.start) : new Date());
     }
 
+    /* ---------- 月の期間（締め日・編集） ---------- */
+
     function getClosing() {
       const value = Number(settings.closingDay);
 
-      return Number.isInteger(value) && value >= 1 && value <= 28
+      return Number.isInteger(value) && value >= 1 && value <= 27
         ? value
         : 0;
     }
 
-    /*
-     * 締め日で区切った1か月（0 = 末日締め）。
-     * 例）20日締め：10/21〜11/20 が「11月20日締め」。
-     * 締め日の翌日以降に始まる勤務は、次の期間に入る。
-     */
-    function periodOf(date) {
+    /* 期間は「開始した月」の名前で呼ぶ（例：5/11〜6/10 は5月分） */
+    function normKey(y, m) {
+      const d = new Date(y, m, 1);
+
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
+    }
+
+    function keyParts(key) {
+      const [y, m] = key.split("-").map(Number);
+
+      return { y, m: m - 1 };
+    }
+
+    function defaultRange(key) {
+      const { y, m } = keyParts(key);
+      const closing = getClosing();
+
+      if (closing === 0) {
+        return { start: new Date(y, m, 1), end: new Date(y, m + 1, 0) };
+      }
+
+      return {
+        start: new Date(y, m, closing + 1),
+        end: new Date(y, m + 1, closing)
+      };
+    }
+
+    function defaultKeyOf(date) {
       const closing = getClosing();
       const y = date.getFullYear();
       const m = date.getMonth();
 
-      let end;
-      let start;
-
       if (closing === 0) {
-        end = new Date(y, m + 1, 0);
-        start = new Date(y, m, 1);
-      } else {
-        end =
-          date.getDate() <= closing
-            ? new Date(y, m, closing)
-            : new Date(y, m + 1, closing);
-
-        start = addDays(
-          new Date(end.getFullYear(), end.getMonth() - 1, closing),
-          1
-        );
+        return normKey(y, m);
       }
 
+      return date.getDate() > closing ? normKey(y, m) : normKey(y, m - 1);
+    }
+
+    const activeOverride = (key) => {
+      const item = periodOv[key];
+
+      return item && !item.removed ? item : null;
+    };
+
+    function rangeOf(key) {
+      const override = activeOverride(key);
+
+      if (override) {
+        return {
+          start: parseKey(override.start),
+          end: parseKey(override.end),
+          overridden: true
+        };
+      }
+
+      const base = defaultRange(key);
+      const { y, m } = keyParts(key);
+
+      /* 前後の月が編集されているときは、すき間・重なりをなくす */
+      const prev = activeOverride(normKey(y, m - 1));
+      const next = activeOverride(normKey(y, m + 1));
+
       return {
-        start,
-        end,
-        key: `${end.getFullYear()}-${pad(end.getMonth() + 1)}`
+        start: prev ? addDays(parseKey(prev.end), 1) : base.start,
+        end: next ? addDays(parseKey(next.start), -1) : base.end,
+        overridden: false
       };
     }
 
-    function periodTitle(period) {
-      const y = period.end.getFullYear();
-      const m = period.end.getMonth() + 1;
+    function periodOf(date) {
+      const defaultKey = defaultKeyOf(date);
+      const { y, m } = keyParts(defaultKey);
 
-      return getClosing() === 0
-        ? `${y}年${m}月分`
-        : `${y}年${m}月${getClosing()}日締め`;
+      const candidates = [
+        defaultKey,
+        normKey(y, m - 1),
+        normKey(y, m + 1)
+      ];
+
+      Object.keys(periodOv).forEach((key) => {
+        if (activeOverride(key) && !candidates.includes(key)) {
+          candidates.push(key);
+        }
+      });
+
+      let best = null;
+
+      candidates.forEach((key) => {
+        const range = rangeOf(key);
+
+        if (date >= range.start && date <= range.end) {
+          if (!best || (range.overridden && !best.overridden)) {
+            best = { key, ...range };
+          }
+        }
+      });
+
+      return best || { key: defaultKey, ...rangeOf(defaultKey) };
     }
 
-    const periodRange = (period) =>
-      `${md(period.start)}〜${md(period.end)}`;
+    function periodTitle(key) {
+      const { y, m } = keyParts(key);
+
+      return `${y}年${m + 1}月分`;
+    }
+
+    const rangeText = (range) =>
+      `${md(range.start)}〜${md(range.end)}`;
+
+    /* 期間ごとの売上・乗車回数・出庫回数 */
+    function groupByPeriod(byDay) {
+      const groups = new Map();
+
+      const get = (key) => {
+        let group = groups.get(key);
+
+        if (!group) {
+          group = { key, sales: 0, count: 0, outings: 0 };
+          groups.set(key, group);
+        }
+
+        return group;
+      };
+
+      const shiftDays = new Set();
+
+      visibleShifts().forEach((item) => {
+        const day = startOfDay(new Date(item.start));
+
+        shiftDays.add(dateKey(day));
+        get(periodOf(day).key).outings += 1;
+      });
+
+      byDay.forEach((entry, key) => {
+        const group = get(periodOf(entry.date).key);
+
+        group.sales += entry.sales;
+        group.count += entry.count;
+
+        /* 営業開始を押していない日は、記録のある日を1出庫とみなす */
+        if (entry.plain && !shiftDays.has(key)) {
+          group.outings += 1;
+        }
+      });
+
+      return groups;
+    }
 
     /* ---------- 画面（タブ）の切り替え ---------- */
 
@@ -4397,11 +4963,32 @@
       button.addEventListener("click", () => showTab(button.dataset.tab));
     });
 
-    /* 営業情報・履歴の画面から設定を開く */
+    /* 設定は、開いた画面に関係する項目だけ表示する */
+    function applySettingsScope() {
+      const scope = currentTab === "history" ? "history" : "map";
+
+      document
+        .querySelectorAll("#settingsModal [data-scope]")
+        .forEach((element) => {
+          element.style.display =
+            element.dataset.scope === scope ? "" : "none";
+        });
+
+      $("settingsTitle").textContent =
+        scope === "history" ? "履歴の設定" : "設定";
+    }
+
+    $("btnSettings").addEventListener("click", applySettingsScope);
+
     document.querySelectorAll("[data-open-settings]").forEach((button) => {
       button.addEventListener("click", () => {
         $("btnSettings").click();
       });
+    });
+
+    /* 締め日を変えたら、クラウドにも送る */
+    $("btnSaveSettings").addEventListener("click", () => {
+      pushConfig();
     });
 
     /* ---------- 営業情報 ---------- */
@@ -4422,7 +5009,7 @@
         return "—";
       }
 
-      return `${yen(sales / (ms / 3600000))}`;
+      return yen(sales / (ms / 3600000));
     }
 
     function updateBizClock() {
@@ -4470,11 +5057,9 @@
       let sales = 0;
       let count = 0;
 
-      ownRecords().forEach((record) => {
-        const time = Date.parse(record.time);
-
-        if (time >= start && time <= end) {
-          sales += Number(record.ryoukin);
+      ownRecs().forEach((rec) => {
+        if (rec.t >= start && rec.t <= end) {
+          sales += rec.v;
           count += 1;
         }
       });
@@ -4504,14 +5089,22 @@
         return;
       }
 
-      shifts.push({
+      if (!confirm("営業を開始しますか？")) {
+        return;
+      }
+
+      const created = {
         id: Date.now().toString(36),
         start: new Date().toISOString(),
-        end: null
-      });
+        end: null,
+        updatedAt: Date.now()
+      };
+
+      shifts.push(created);
 
       saveShifts();
       refresh();
+      pushShift(created);
     });
 
     $("btnShiftEnd").addEventListener("click", () => {
@@ -4526,15 +5119,18 @@
       }
 
       active.end = new Date().toISOString();
+      active.updatedAt = Date.now();
 
       saveShifts();
       refresh();
+      pushShift(active);
     });
 
-    /* ---------- 履歴 ---------- */
+    /* ---------- 履歴（グラフ） ---------- */
 
-    let histMode = "week";
+    let histMode = "month";
     let histAnchor = null;
+    let histYear = null;
     let selectedKey = null;
 
     function niceMax(value) {
@@ -4549,19 +5145,31 @@
       return nice * mag;
     }
 
-    function buildChart(days) {
+    function manText(value) {
+      if (value >= 10000) {
+        return `${(value / 10000).toFixed(1).replace(/\.0$/, "")}万`;
+      }
+
+      return value.toLocaleString();
+    }
+
+    /*
+     * 棒グラフ。金額は棒に重ならないよう、グラフの下の表示に出す
+     * （1年のグラフだけ、各月の合計を棒の上に小さく添える）。
+     */
+    function buildChart(items, options) {
       const W = 340;
       const H = 220;
-      const left = 50;
+      const top = 20;
       const right = 8;
-      const top = 18;
-      const bottom = histMode === "week" ? 36 : 24;
-      const plotW = W - left - right;
+      const bottom = 24;
       const plotH = H - top - bottom;
-      const n = days.length;
+      const max = niceMax(Math.max(0, ...items.map((item) => item.sales)));
+      const left = 14 + Math.round(max).toLocaleString().length * 5.4;
+      const plotW = W - left - right;
+      const n = items.length;
       const slot = plotW / n;
       const barW = Math.min(slot * 0.66, 36);
-      const max = niceMax(Math.max(0, ...days.map((day) => day.sales)));
 
       let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="売上の棒グラフ">`;
 
@@ -4573,77 +5181,56 @@
         svg += `<text x="${left - 6}" y="${y + 3}" font-size="9" fill="#777" text-anchor="end">${Math.round(value).toLocaleString()}</text>`;
       }
 
-      days.forEach((day, i) => {
+      items.forEach((item, i) => {
         const x = left + slot * i + (slot - barW) / 2;
-        const h = (day.sales / max) * plotH;
+        const h = (item.sales / max) * plotH;
         const y = top + plotH - h;
-        const selected = day.key === selectedKey;
-        const dow = day.date.getDay();
-        const color = dow === 0 ? "#c62828" : dow === 6 ? "#1565c0" : "#555";
         const cx = left + slot * i + slot / 2;
+        const selected = item.key === selectedKey;
 
-        if (day.sales > 0) {
+        if (item.sales > 0) {
           svg += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="2" fill="${selected ? "#ff9800" : "#42a5f5"}"/>`;
-        }
 
-        if (histMode === "week") {
-          if (day.sales > 0) {
-            svg += `<text x="${cx}" y="${y - 4}" font-size="9" fill="#333" text-anchor="middle">${day.sales.toLocaleString()}</text>`;
-          }
-
-          svg += `<text x="${cx}" y="${top + plotH + 14}" font-size="12" font-weight="bold" fill="${color}" text-anchor="middle">${WEEK[dow]}</text>`;
-          svg += `<text x="${cx}" y="${top + plotH + 28}" font-size="10" fill="#666" text-anchor="middle">${day.date.getDate()}</text>`;
-        } else {
-          const showLabel =
-            i % 5 === 0 || i === n - 1 || day.date.getDate() === 1;
-
-          if (showLabel) {
-            const text =
-              day.date.getDate() === 1 ? md(day.date) : day.date.getDate();
-
-            svg += `<text x="${cx}" y="${top + plotH + 14}" font-size="10" fill="${color}" text-anchor="middle">${text}</text>`;
-          } else if (selected && day.sales > 0) {
-            svg += `<text x="${cx}" y="${y - 4}" font-size="9" fill="#333" text-anchor="middle">${day.sales.toLocaleString()}</text>`;
+          if (options.valueLabels) {
+            svg += `<text x="${cx}" y="${y - 3}" font-size="8" fill="#333" text-anchor="middle">${manText(item.sales)}</text>`;
           }
         }
 
-        svg += `<rect x="${left + slot * i}" y="${top}" width="${slot}" height="${plotH + bottom}" fill="transparent" data-key="${day.key}"/>`;
+        if (item.label) {
+          svg += `<text x="${cx}" y="${top + plotH + 14}" font-size="${options.labelSize}" fill="${item.color}" text-anchor="middle">${item.label}</text>`;
+        }
+
+        svg += `<rect x="${left + slot * i}" y="${top}" width="${slot}" height="${plotH + bottom}" fill="transparent" data-key="${item.key}"/>`;
       });
 
       return svg + "</svg>";
     }
 
-    function renderHistory() {
-      const today = workToday();
+    /* 日付が重ならないよう、5日おき（端の近くは省く） */
+    function monthLabels(days) {
+      const n = days.length;
+      const shown = new Set();
 
-      if (!histAnchor) {
-        histAnchor = today;
-      }
+      days.forEach((day, i) => {
+        if (i % 5 === 0 || (i === n - 1 && (n - 1) % 5 >= 3)) {
+          shown.add(i);
+        }
+      });
 
-      const byDay = buildDaily();
+      days.forEach((day, i) => {
+        if (day.date.getDate() === 1 && !shown.has(i)) {
+          const near = [...shown].some((index) => Math.abs(index - i) < 4);
 
-      let rangeStart;
-      let rangeEnd;
+          if (!near) {
+            shown.add(i);
+          }
+        }
+      });
 
-      if (histMode === "week") {
-        rangeStart = mondayOf(histAnchor);
-        rangeEnd = addDays(rangeStart, 6);
+      return shown;
+    }
 
-        $("histTitle").textContent = `${md(rangeStart)}〜${md(rangeEnd)}`;
-        $("histSub").textContent =
-          today >= rangeStart && today <= rangeEnd
-            ? "今週"
-            : `${rangeStart.getFullYear()}年`;
-      } else {
-        const period = periodOf(histAnchor);
-
-        rangeStart = period.start;
-        rangeEnd = period.end;
-
-        $("histTitle").textContent = periodTitle(period);
-        $("histSub").textContent = periodRange(period);
-      }
-
+    function earliestDate(byDay) {
       let earliest = null;
 
       byDay.forEach((entry) => {
@@ -4652,45 +5239,180 @@
         }
       });
 
-      $("btnHistNext").disabled = rangeEnd >= today;
-      $("btnHistPrev").disabled = !earliest || rangeStart <= earliest;
+      visibleShifts().forEach((item) => {
+        const day = startOfDay(new Date(item.start));
 
-      const days = [];
+        if (!earliest || day < earliest) {
+          earliest = day;
+        }
+      });
 
-      for (let d = rangeStart; d <= rangeEnd; d = addDays(d, 1)) {
-        const key = dateKey(d);
-        const entry = byDay.get(key);
+      return earliest;
+    }
 
-        days.push({
-          key,
-          date: d,
-          sales: entry ? entry.sales : 0,
-          count: entry ? entry.count : 0
+    function renderHistory() {
+      const today = workToday();
+      const byDay = buildDaily();
+      const groups = groupByPeriod(byDay);
+      const earliest = earliestDate(byDay);
+
+      if (!histAnchor) {
+        histAnchor = today;
+      }
+
+      const month = histMode === "month";
+
+      $("btnPeriodEdit").parentElement.style.display = month ? "" : "none";
+
+      let total = 0;
+      let count = 0;
+      let outings = 0;
+      let chartHtml = "";
+      let caption = "";
+      let canJump = false;
+
+      if (month) {
+        const period = periodOf(histAnchor);
+
+        $("histTitle").textContent = periodTitle(period.key);
+        $("histSub").textContent =
+          rangeText(period) + (period.overridden ? "（編集済み）" : "");
+
+        $("btnHistNext").disabled = period.end >= today;
+        $("btnHistPrev").disabled = !earliest || period.start <= earliest;
+
+        const days = [];
+
+        for (
+          let d = period.start;
+          d <= period.end && days.length < 70;
+          d = addDays(d, 1)
+        ) {
+          const key = dateKey(d);
+          const entry = byDay.get(key);
+
+          days.push({
+            key,
+            date: d,
+            sales: entry ? entry.sales : 0,
+            count: entry ? entry.count : 0
+          });
+        }
+
+        if (!days.some((day) => day.key === selectedKey)) {
+          selectedKey = days.some((day) => day.key === dateKey(today))
+            ? dateKey(today)
+            : null;
+        }
+
+        const labelSet = monthLabels(days);
+
+        const items = days.map((day, i) => {
+          const dow = day.date.getDay();
+          const first = i === 0 || day.date.getDate() === 1;
+
+          return {
+            key: day.key,
+            sales: day.sales,
+            color: dow === 0 ? "#c62828" : dow === 6 ? "#1565c0" : "#555",
+            label: labelSet.has(i)
+              ? first
+                ? md(day.date)
+                : String(day.date.getDate())
+              : ""
+          };
         });
-      }
 
-      if (!days.some((day) => day.key === selectedKey)) {
-        selectedKey = days.some((day) => day.key === dateKey(today))
-          ? dateKey(today)
-          : null;
-      }
+        chartHtml = buildChart(items, { valueLabels: false, labelSize: 10 });
 
-      const total = days.reduce((sum, day) => sum + day.sales, 0);
-      const count = days.reduce((sum, day) => sum + day.count, 0);
-      const workDays = days.filter((day) => day.count > 0).length;
+        total = days.reduce((sum, day) => sum + day.sales, 0);
+        count = days.reduce((sum, day) => sum + day.count, 0);
+        outings = groups.has(period.key) ? groups.get(period.key).outings : 0;
+
+        const picked = days.find((day) => day.key === selectedKey);
+
+        caption = picked
+          ? `${mdw(picked.date)}　${yen(picked.sales)}　乗車${picked.count}回`
+          : "棒をタップすると、その日の売上が下に出ます";
+
+        $("histTotalLabel").textContent = "この月の売上合計";
+      } else {
+        if (!histYear) {
+          histYear = Number(periodOf(histAnchor).key.slice(0, 4));
+        }
+
+        const currentYear = Number(periodOf(today).key.slice(0, 4));
+        const firstYear = earliest
+          ? Number(periodOf(earliest).key.slice(0, 4))
+          : currentYear;
+
+        $("histTitle").textContent = `${histYear}年`;
+        $("histSub").textContent = "月ごとの合計売上";
+        $("btnHistNext").disabled = histYear >= currentYear;
+        $("btnHistPrev").disabled = histYear <= firstYear;
+
+        const months = [];
+
+        for (let m = 1; m <= 12; m++) {
+          const key = `${histYear}-${pad(m)}`;
+          const group = groups.get(key);
+
+          months.push({
+            key,
+            m,
+            sales: group ? group.sales : 0,
+            count: group ? group.count : 0,
+            outings: group ? group.outings : 0
+          });
+        }
+
+        const currentKey = periodOf(today).key;
+
+        if (!months.some((item) => item.key === selectedKey)) {
+          selectedKey = months.some((item) => item.key === currentKey)
+            ? currentKey
+            : null;
+        }
+
+        chartHtml = buildChart(
+          months.map((item) => ({
+            key: item.key,
+            sales: item.sales,
+            color: "#555",
+            label: `${item.m}月`
+          })),
+          { valueLabels: true, labelSize: 9 }
+        );
+
+        total = months.reduce((sum, item) => sum + item.sales, 0);
+        count = months.reduce((sum, item) => sum + item.count, 0);
+        outings = months.reduce((sum, item) => sum + item.outings, 0);
+
+        const picked = months.find((item) => item.key === selectedKey);
+
+        if (picked) {
+          const range = rangeOf(picked.key);
+
+          caption =
+            `${picked.m}月分（${rangeText(range)}）　${yen(picked.sales)}` +
+            `　乗車${picked.count}回`;
+
+          canJump = range.start <= today;
+        } else {
+          caption = "棒をタップすると、その月の合計が下に出ます";
+        }
+
+        $("histTotalLabel").textContent = "この年の売上合計";
+      }
 
       $("histTotal").textContent = yen(total);
       $("histCount").textContent = `${count}回`;
-      $("histAvg").textContent = yen(workDays ? total / workDays : 0);
+      $("histAvg").textContent = yen(outings ? total / outings : 0);
+      $("histAvgLabel").textContent = `1出庫あたりの平均（出庫${outings}回）`;
 
-      $("histChart").innerHTML = buildChart(days);
-
-      const picked = days.find((day) => day.key === selectedKey);
-
-      $("histCaption").textContent = picked
-        ? `${md(picked.date)}（${WEEK[picked.date.getDay()]}）　` +
-          `${yen(picked.sales)}　${picked.count}回`
-        : "棒をタップすると、その日の売上が出ます";
+      $("histChart").innerHTML = chartHtml;
+      $("histCaption").textContent = caption;
+      $("btnYearToMonth").style.display = canJump ? "" : "none";
 
       document.querySelectorAll("#histSeg button").forEach((button) => {
         button.classList.toggle(
@@ -4699,65 +5421,106 @@
         );
       });
 
-      renderMonthList(byDay, today);
+      renderRecent();
+      renderMonthList(groups, today);
     }
 
-    function renderMonthList(byDay, today) {
-      const periods = new Map();
+    /* ---------- 履歴（稼働記録・月ごとの一覧） ---------- */
 
-      byDay.forEach((entry) => {
-        const period = periodOf(entry.date);
-        const item = periods.get(period.key) || {
-          period,
+    function formatSpan(ms) {
+      const total = Math.max(0, Math.round(ms / 60000));
+
+      return `${Math.floor(total / 60)}:${pad(total % 60)}`;
+    }
+
+    function renderRecent() {
+      const recs = ownRecs();
+
+      const list = visibleShifts()
+        .slice()
+        .sort((a, b) => Date.parse(b.start) - Date.parse(a.start))
+        .slice(0, 5);
+
+      if (list.length === 0) {
+        $("recentList").innerHTML =
+          '<div class="empty-note">稼働記録はまだありません。<br>' +
+          "営業開始を押すか、右上の「＋ 勤務を追加」から入れられます。</div>";
+        return;
+      }
+
+      $("recentList").innerHTML = list
+        .map((item) => {
+          const start = Date.parse(item.start);
+          const end = item.end ? Date.parse(item.end) : Infinity;
+          const date = new Date(start);
+
+          let sales = 0;
+          let count = 0;
+
+          recs.forEach((rec) => {
+            if (rec.t >= start && rec.t <= end) {
+              sales += rec.v;
+              count += 1;
+            }
+          });
+
+          const span = item.end
+            ? `拘束 ${formatSpan(end - start)}`
+            : "営業中";
+
+          return `
+            <div class="rec-row">
+              <div class="rec-main">
+                <div class="rec-date">${mdw(date)}</div>
+                <div class="rec-sub">${span}　${count}回</div>
+              </div>
+              <div class="rec-right">
+                <div class="rec-sales">${yen(sales)}</div>
+              </div>
+              <button type="button" class="rec-edit" data-id="${item.id}">編集</button>
+            </div>`;
+        })
+        .join("");
+    }
+
+    function renderMonthList(groups, today) {
+      const currentKey = periodOf(today).key;
+
+      if (!groups.has(currentKey)) {
+        groups.set(currentKey, {
+          key: currentKey,
           sales: 0,
-          count: 0
-        };
-
-        item.sales += entry.sales;
-        item.count += entry.count;
-
-        periods.set(period.key, item);
-      });
-
-      const current = periodOf(today);
-
-      if (!periods.has(current.key)) {
-        periods.set(current.key, {
-          period: current,
-          sales: 0,
-          count: 0
+          count: 0,
+          outings: 0
         });
       }
 
-      const list = [...periods.values()]
-        .sort((a, b) => b.period.end - a.period.end)
+      const list = [...groups.values()]
+        .map((group) => ({ ...group, range: rangeOf(group.key) }))
+        .sort((a, b) => b.range.end - a.range.end)
         .slice(0, 24);
 
       $("monthList").innerHTML = list
         .map((item) => {
-          const isCurrent = item.period.key === current.key;
-          const anchor = item.period.end > today ? today : item.period.end;
+          const isCurrent = item.key === currentKey;
+          const anchor = item.range.end > today ? today : item.range.end;
 
           return `
             <button type="button" class="month-row${isCurrent ? " current" : ""}" data-anchor="${dateKey(anchor)}">
               <div>
-                <div class="mr-title">${periodTitle(item.period)}${isCurrent ? '<span class="mr-tag">集計中</span>' : ""}</div>
-                <div class="mr-range">${periodRange(item.period)}</div>
+                <div class="mr-title">${periodTitle(item.key)}${isCurrent ? '<span class="mr-tag">集計中</span>' : ""}</div>
+                <div class="mr-range">${rangeText(item.range)}</div>
               </div>
               <div class="mr-right">
                 <div class="mr-sales">${yen(item.sales)}</div>
-                <div class="mr-sub">${item.count}回</div>
+                <div class="mr-sub">乗車${item.count}回・出庫${item.outings}回</div>
               </div>
             </button>`;
         })
         .join("");
     }
 
-    function parseKey(key) {
-      const [y, m, d] = key.split("-").map(Number);
-
-      return new Date(y, m - 1, d);
-    }
+    /* ---------- 履歴の操作 ---------- */
 
     $("histSeg").addEventListener("click", (event) => {
       const mode = event.target.dataset && event.target.dataset.mode;
@@ -4766,22 +5529,30 @@
         return;
       }
 
-      histMode = mode;
-
       const today = workToday();
 
-      if (histAnchor > today) {
-        histAnchor = today;
+      if (mode === "year") {
+        histYear = Number(periodOf(histAnchor || today).key.slice(0, 4));
+      } else if (histYear) {
+        const currentYear = Number(periodOf(today).key.slice(0, 4));
+
+        histAnchor =
+          histYear >= currentYear
+            ? today
+            : parseKey(`${histYear}-12-31`);
       }
+
+      histMode = mode;
+      selectedKey = null;
 
       renderHistory();
     });
 
     $("btnHistPrev").addEventListener("click", () => {
-      if (histMode === "week") {
-        histAnchor = addDays(mondayOf(histAnchor), -7);
-      } else {
+      if (histMode === "month") {
         histAnchor = addDays(periodOf(histAnchor).start, -1);
+      } else {
+        histYear -= 1;
       }
 
       selectedKey = null;
@@ -4791,20 +5562,21 @@
     $("btnHistNext").addEventListener("click", () => {
       const today = workToday();
 
-      if (histMode === "week") {
-        histAnchor = addDays(mondayOf(histAnchor), 7);
-      } else {
+      if (histMode === "month") {
         histAnchor = addDays(periodOf(histAnchor).end, 1);
-      }
 
-      if (histAnchor > today) {
-        histAnchor = today;
+        if (histAnchor > today) {
+          histAnchor = today;
+        }
+      } else {
+        histYear += 1;
       }
 
       selectedKey = null;
       renderHistory();
     });
 
+    /* 棒をタップしたら必ずその棒を選ぶ（金額はグラフの下に出す） */
     $("histChart").addEventListener("click", (event) => {
       const key = event.target.getAttribute("data-key");
 
@@ -4812,7 +5584,18 @@
         return;
       }
 
-      selectedKey = selectedKey === key ? null : key;
+      selectedKey = key;
+      renderHistory();
+    });
+
+    $("btnYearToMonth").addEventListener("click", () => {
+      const today = workToday();
+      const range = rangeOf(selectedKey);
+
+      histMode = "month";
+      histAnchor = range.end > today ? today : range.end;
+      selectedKey = null;
+
       renderHistory();
     });
 
@@ -4831,6 +5614,264 @@
       $("histBody").scrollTo({ top: 0, behavior: "smooth" });
     });
 
+    /* ---------- 稼働記録の編集・追加 ---------- */
+
+    let editingShiftId = null;
+
+    function durationMinutes() {
+      const hours = Number.parseInt($("shiftHours").value, 10) || 0;
+      const minutes = Number.parseInt($("shiftMinutes").value, 10) || 0;
+
+      return hours * 60 + minutes;
+    }
+
+    function updateEndNote() {
+      const start = Date.parse($("shiftStart").value);
+
+      if (!Number.isFinite(start)) {
+        $("shiftEndNote").textContent = "";
+        return;
+      }
+
+      const end = new Date(start + durationMinutes() * 60000);
+
+      $("shiftEndNote").textContent = `終了：${mdw(end)} ${hm(end)}`;
+    }
+
+    ["shiftStart", "shiftHours", "shiftMinutes"].forEach((id) => {
+      $(id).addEventListener("input", updateEndNote);
+    });
+
+    function openShiftModal(id) {
+      editingShiftId = id;
+
+      const item = id ? shifts.find((entry) => entry.id === id) : null;
+      const isActive = !!item && !item.end;
+
+      $("shiftModalTitle").textContent = item
+        ? "稼働記録の編集"
+        : "稼働記録を追加";
+
+      if (item) {
+        $("shiftStart").value = toLocalInput(new Date(item.start));
+
+        if (item.end) {
+          const total = Math.round(
+            (Date.parse(item.end) - Date.parse(item.start)) / 60000
+          );
+
+          $("shiftHours").value = String(Math.floor(total / 60));
+          $("shiftMinutes").value = String(total % 60);
+        }
+      } else {
+        const last = lastShift();
+
+        const base = new Date();
+        base.setHours(8, 0, 0, 0);
+
+        if (base.getTime() > Date.now()) {
+          base.setDate(base.getDate() - 1);
+        }
+
+        let hours = 12;
+        let minutes = 0;
+
+        if (last && last.end) {
+          const total = Math.round(
+            (Date.parse(last.end) - Date.parse(last.start)) / 60000
+          );
+
+          hours = Math.floor(total / 60);
+          minutes = total % 60;
+        }
+
+        $("shiftStart").value = toLocalInput(base);
+        $("shiftHours").value = String(hours);
+        $("shiftMinutes").value = String(minutes);
+      }
+
+      $("shiftDurationBox").style.display = isActive ? "none" : "";
+      $("btnShiftDelete").style.display = item ? "" : "none";
+
+      updateEndNote();
+      $("shiftModal").style.display = "flex";
+    }
+
+    function closeShiftModal() {
+      $("shiftModal").style.display = "none";
+      editingShiftId = null;
+    }
+
+    $("btnShiftAdd").addEventListener("click", () => openShiftModal(null));
+    $("btnShiftCancel").addEventListener("click", closeShiftModal);
+
+    $("recentList").addEventListener("click", (event) => {
+      const button = event.target.closest(".rec-edit");
+
+      if (button) {
+        openShiftModal(button.dataset.id);
+      }
+    });
+
+    $("btnShiftSave").addEventListener("click", () => {
+      const item = editingShiftId
+        ? shifts.find((entry) => entry.id === editingShiftId)
+        : null;
+
+      const isActive = !!item && !item.end;
+      const start = Date.parse($("shiftStart").value);
+
+      if (!Number.isFinite(start)) {
+        alert("開始日時を入力してください。");
+        return;
+      }
+
+      let end = Infinity;
+
+      if (!isActive) {
+        const minutes = durationMinutes();
+
+        if (minutes < 1 || minutes > 48 * 60) {
+          alert("拘束時間は1分〜48時間で入力してください。");
+          return;
+        }
+
+        end = start + minutes * 60000;
+      }
+
+      if (start > Date.now() || (end !== Infinity && end > Date.now() + 60000)) {
+        alert("開始・終了が未来の時刻になっています。");
+        return;
+      }
+
+      const overlapped = visibleShifts().some((other) => {
+        if (item && other.id === item.id) {
+          return false;
+        }
+
+        const otherStart = Date.parse(other.start);
+        const otherEnd = other.end ? Date.parse(other.end) : Infinity;
+
+        return start < otherEnd && end > otherStart;
+      });
+
+      if (overlapped) {
+        alert("ほかの稼働記録と時間が重なっています。");
+        return;
+      }
+
+      let target = item;
+
+      if (!target) {
+        target = { id: Date.now().toString(36) };
+        shifts.push(target);
+      }
+
+      target.start = new Date(start).toISOString();
+      target.end = isActive ? null : new Date(end).toISOString();
+      target.updatedAt = Date.now();
+      target.deleted = false;
+
+      saveShifts();
+      closeShiftModal();
+      refresh();
+      pushShift(target);
+    });
+
+    $("btnShiftDelete").addEventListener("click", () => {
+      const item = shifts.find((entry) => entry.id === editingShiftId);
+
+      if (!item) {
+        return;
+      }
+
+      if (
+        !confirm(
+          "この稼働記録を削除しますか？\n（乗車の記録は消えません）"
+        )
+      ) {
+        return;
+      }
+
+      item.deleted = true;
+      item.updatedAt = Date.now();
+
+      saveShifts();
+      closeShiftModal();
+      refresh();
+      pushShift(item);
+    });
+
+    /* ---------- 月の開始日・締め日の編集 ---------- */
+
+    let editingPeriodKey = null;
+
+    $("btnPeriodEdit").addEventListener("click", () => {
+      const period = periodOf(histAnchor);
+      const base = defaultRange(period.key);
+
+      editingPeriodKey = period.key;
+
+      $("periodModalName").textContent = periodTitle(period.key);
+      $("periodStart").value = dateKey(period.start);
+      $("periodEnd").value = dateKey(period.end);
+      $("periodDefaultNote").textContent =
+        `標準：${rangeText(base)}（設定の締め日どおり）`;
+
+      $("btnPeriodReset").style.display = period.overridden ? "" : "none";
+      $("periodModal").style.display = "flex";
+    });
+
+    $("btnPeriodCancel").addEventListener("click", () => {
+      $("periodModal").style.display = "none";
+    });
+
+    function applyPeriod(item) {
+      periodOv[item.key] = item;
+
+      savePeriods();
+      $("periodModal").style.display = "none";
+
+      refresh();
+      pushPeriod(item);
+    }
+
+    $("btnPeriodSave").addEventListener("click", () => {
+      const start = $("periodStart").value;
+      const end = $("periodEnd").value;
+
+      if (!start || !end || start > end) {
+        alert("開始日と終了日を正しく入力してください。");
+        return;
+      }
+
+      const base = defaultRange(editingPeriodKey);
+
+      /* 標準と同じ日付なら、編集を取り消した扱いにする */
+      const same =
+        start === dateKey(base.start) && end === dateKey(base.end);
+
+      applyPeriod({
+        key: editingPeriodKey,
+        start,
+        end,
+        updatedAt: Date.now(),
+        removed: same
+      });
+    });
+
+    $("btnPeriodReset").addEventListener("click", () => {
+      const current = periodOv[editingPeriodKey];
+
+      applyPeriod({
+        key: editingPeriodKey,
+        start: current ? current.start : "",
+        end: current ? current.end : "",
+        updatedAt: Date.now(),
+        removed: true
+      });
+    });
+
     /* ---------- 更新 ---------- */
 
     function refresh() {
@@ -4845,10 +5886,14 @@
 
     window.reloadShifts = () => {
       shifts = loadShifts();
+      periodOv = loadPeriods();
+
       refresh();
+      syncShifts();
     };
 
     shifts = loadShifts();
+    periodOv = loadPeriods();
   })();
   </script>
 </body>
