@@ -817,6 +817,417 @@
     .section-title {
       margin-top: 16px;
     }
+  
+    /*
+     * ========================================
+     * 画面下のタブ（マップ／営業情報／履歴）
+     * ========================================
+     */
+    :root {
+      --tabbar-h: calc(56px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* 地図の著作権表示がタブに隠れないようにする */
+    .leaflet-bottom {
+      bottom: var(--tabbar-h);
+    }
+
+    #tabBar {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1400;
+
+      display: flex;
+      box-sizing: border-box;
+      height: var(--tabbar-h);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+
+      background: #fff;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .tab-btn {
+      flex: 1;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+
+      color: #777;
+      font-size: 11px;
+
+      background: none;
+      border: none;
+
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn .tab-ico {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .tab-btn.active {
+      color: #1976d2;
+      font-weight: bold;
+    }
+
+    .app-view {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: var(--tabbar-h);
+      left: 0;
+      z-index: 1300;
+
+      display: none;
+      flex-direction: column;
+
+      background: #f4f6f8;
+    }
+
+    .app-view.show {
+      display: flex;
+    }
+
+    .view-header {
+      flex: none;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 12px 16px;
+      padding-top: calc(12px + env(safe-area-inset-top, 0px));
+
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .view-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .view-gear {
+      padding: 6px 12px;
+
+      color: #333;
+      font-size: 13px;
+
+      background: #f1f1f1;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+
+      cursor: pointer;
+    }
+
+    .view-body {
+      flex: 1;
+
+      padding: 14px 14px 24px;
+
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .card {
+      padding: 14px 16px;
+
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-label {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .card-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+
+      margin-top: 10px;
+    }
+
+    /* ----- 営業情報 ----- */
+    .biz-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .status-chip {
+      padding: 4px 12px;
+
+      color: #555;
+      font-size: 13px;
+      font-weight: bold;
+      white-space: nowrap;
+
+      background: #e0e0e0;
+      border-radius: 999px;
+    }
+
+    .status-chip.on {
+      color: #1b5e20;
+      background: #c8e6c9;
+    }
+
+    .biz-period {
+      color: #666;
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .biz-elapsed {
+      margin-top: 6px;
+
+      font-size: 30px;
+      font-weight: bold;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .big-value {
+      margin-top: 2px;
+
+      color: #0d47a1;
+      font-size: 46px;
+      font-weight: bold;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mid-value {
+      margin-top: 2px;
+
+      font-size: 28px;
+      font-weight: bold;
+      line-height: 1.2;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mid-value small {
+      color: #666;
+      font-size: 13px;
+      font-weight: normal;
+    }
+
+    .biz-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+
+      margin-top: 14px;
+    }
+
+    .biz-btn {
+      height: 64px;
+
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+
+      border: none;
+      border-radius: 14px;
+
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    #btnShiftStart {
+      background: #2e7d32;
+    }
+
+    #btnShiftEnd {
+      background: #c62828;
+    }
+
+    .biz-btn:disabled {
+      color: #90a4ae;
+      background: #cfd8dc;
+
+      cursor: default;
+    }
+
+    /* ----- 履歴 ----- */
+    .seg {
+      display: flex;
+      padding: 3px;
+
+      background: #e3e8ee;
+      border-radius: 10px;
+    }
+
+    .seg button {
+      flex: 1;
+
+      padding: 8px 0;
+
+      color: #555;
+      font-size: 14px;
+
+      background: none;
+      border: none;
+      border-radius: 8px;
+
+      cursor: pointer;
+    }
+
+    .seg button.selected {
+      color: #0d47a1;
+      font-weight: bold;
+
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .hist-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+
+      margin-top: 12px;
+    }
+
+    .hist-nav button {
+      width: 44px;
+      height: 40px;
+
+      font-size: 18px;
+
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+
+      cursor: pointer;
+    }
+
+    .hist-nav button:disabled {
+      color: #bbb;
+      background: #f1f1f1;
+
+      cursor: default;
+    }
+
+    .hist-title {
+      flex: 1;
+
+      text-align: center;
+    }
+
+    .hist-title b {
+      display: block;
+      font-size: 16px;
+    }
+
+    .hist-title span {
+      color: #666;
+      font-size: 12px;
+    }
+
+    #histChart svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    #histCaption {
+      min-height: 20px;
+      margin-top: 6px;
+
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .section-title {
+      margin: 20px 2px 8px;
+
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .month-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+
+      box-sizing: border-box;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 12px 14px;
+
+      text-align: left;
+
+      background: #fff;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+
+      cursor: pointer;
+    }
+
+    .month-row.current {
+      outline: 2px solid #90caf9;
+    }
+
+    .mr-title {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .mr-range {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .mr-tag {
+      margin-left: 6px;
+      padding: 1px 6px;
+
+      color: #0d47a1;
+      font-size: 11px;
+      font-weight: normal;
+
+      background: #e3f2fd;
+      border-radius: 6px;
+    }
+
+    .mr-right {
+      text-align: right;
+    }
+
+    .mr-sales {
+      font-size: 17px;
+      font-weight: bold;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mr-sub {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .empty-note {
+      padding: 14px;
+
+      color: #888;
+      font-size: 13px;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -958,6 +1369,112 @@
   </button>
 
   <!-- 記録入力・編集モーダル -->
+
+  <!-- 営業情報の画面 -->
+  <div id="viewBiz" class="app-view">
+    <div class="view-header">
+      <h2>営業情報</h2>
+      <button type="button" class="view-gear" data-open-settings>⚙ 設定</button>
+    </div>
+
+    <div class="view-body">
+      <div class="card">
+        <div class="biz-status">
+          <span id="bizChip" class="status-chip">営業前</span>
+          <span id="bizPeriod" class="biz-period"></span>
+        </div>
+
+        <div class="card-label" style="margin-top: 10px;">営業時間</div>
+        <div id="bizElapsed" class="biz-elapsed">0:00:00</div>
+      </div>
+
+      <div class="card" style="margin-top: 10px;">
+        <div class="card-label">売上合計</div>
+        <div id="bizSales" class="big-value">¥0</div>
+      </div>
+
+      <div class="card-row">
+        <div class="card">
+          <div class="card-label">乗車回数</div>
+          <div class="mid-value"><span id="bizCount">0</span><small> 回</small></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label">1時間あたりの平均売上</div>
+          <div class="mid-value"><span id="bizHourly">—</span></div>
+        </div>
+      </div>
+
+      <div class="biz-actions">
+        <button type="button" id="btnShiftStart" class="biz-btn">営業開始</button>
+        <button type="button" id="btnShiftEnd" class="biz-btn">営業終了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 履歴の画面 -->
+  <div id="viewHistory" class="app-view">
+    <div class="view-header">
+      <h2>履歴</h2>
+      <button type="button" class="view-gear" data-open-settings>⚙ 設定</button>
+    </div>
+
+    <div class="view-body" id="histBody">
+      <div class="seg" id="histSeg">
+        <button type="button" data-mode="week" class="selected">1週間</button>
+        <button type="button" data-mode="month">1か月</button>
+      </div>
+
+      <div class="hist-nav">
+        <button type="button" id="btnHistPrev" aria-label="前へ">◀</button>
+
+        <div class="hist-title">
+          <b id="histTitle"></b>
+          <span id="histSub"></span>
+        </div>
+
+        <button type="button" id="btnHistNext" aria-label="次へ">▶</button>
+      </div>
+
+      <div class="card" style="margin-top: 12px;">
+        <div class="card-label">期間の売上合計</div>
+        <div id="histTotal" class="big-value">¥0</div>
+
+        <div class="card-row" style="margin-top: 8px;">
+          <div>
+            <div class="card-label">乗車回数</div>
+            <div class="mid-value" style="font-size: 22px;" id="histCount">0回</div>
+          </div>
+          <div>
+            <div class="card-label">1日平均</div>
+            <div class="mid-value" style="font-size: 22px;" id="histAvg">¥0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 10px; padding: 12px 8px;">
+        <div id="histChart"></div>
+        <div id="histCaption"></div>
+      </div>
+
+      <div class="section-title">月ごとの合計売上</div>
+      <div id="monthList"></div>
+    </div>
+  </div>
+
+  <!-- 画面下のタブ -->
+  <nav id="tabBar">
+    <button type="button" class="tab-btn active" data-tab="map">
+      <span class="tab-ico">🗺️</span><span>マップ</span>
+    </button>
+    <button type="button" class="tab-btn" data-tab="biz">
+      <span class="tab-ico">🚕</span><span>営業情報</span>
+    </button>
+    <button type="button" class="tab-btn" data-tab="history">
+      <span class="tab-ico">📊</span><span>履歴</span>
+    </button>
+  </nav>
+
   <div id="recordModal" class="modal-overlay">
     <div class="modal-box">
       <div class="modal-head">
@@ -1087,6 +1604,42 @@
         min="0"
         step="1"
       >
+
+      <label for="settingClosingDay">月の締め日（月ごとの集計）</label>
+      <select id="settingClosingDay">
+        <option value="0">末日</option>
+        <option value="1">1日</option>
+        <option value="2">2日</option>
+        <option value="3">3日</option>
+        <option value="4">4日</option>
+        <option value="5">5日</option>
+        <option value="6">6日</option>
+        <option value="7">7日</option>
+        <option value="8">8日</option>
+        <option value="9">9日</option>
+        <option value="10">10日</option>
+        <option value="11">11日</option>
+        <option value="12">12日</option>
+        <option value="13">13日</option>
+        <option value="14">14日</option>
+        <option value="15">15日</option>
+        <option value="16">16日</option>
+        <option value="17">17日</option>
+        <option value="18">18日</option>
+        <option value="19">19日</option>
+        <option value="20">20日</option>
+        <option value="21">21日</option>
+        <option value="22">22日</option>
+        <option value="23">23日</option>
+        <option value="24">24日</option>
+        <option value="25">25日</option>
+        <option value="26">26日</option>
+        <option value="27">27日</option>
+        <option value="28">28日</option>
+      </select>
+      <p class="modal-note">
+        締め日の次の勤務から、次の1か月の集計を始めます。
+      </p>
 
       <label for="settingDisplayName">フレンドに表示する名前</label>
       <input
@@ -1219,7 +1772,8 @@
     const DEFAULT_SETTINGS = {
       boundary1: 2000,
       boundary2: 4000,
-      pickupFee: 500
+      pickupFee: 500,
+      closingDay: 0 /* 月の締め日（0 = 末日、1〜28 = その日） */
     };
 
     const savedSettings = localStorage.getItem("taxi_settings");
@@ -1438,6 +1992,9 @@
     const LAST_POS_KEY = "taxi_last_pos";
     let lastPosSavedAt = 0;
 
+    /* これより精度が悪いとき（PCなど）は、精度の円を出さない（m） */
+    const MAX_ACCURACY_CIRCLE = 150;
+
     function restoreLastPosition() {
       if (!firstFix) {
         return;
@@ -1497,6 +2054,12 @@
         );
       }
 
+      /*
+       * 精度の円は、精度が十分によいときだけ表示する。
+       * PCなどでは精度が数km以上になり、地図いっぱいに広がってしまうため。
+       */
+      const showAccuracy = accuracy <= MAX_ACCURACY_CIRCLE;
+
       if (!currentLocationMarker) {
         currentLocationMarker = L.circleMarker(latlng, {
           radius: 8,
@@ -1507,16 +2070,27 @@
         }).addTo(map);
 
         currentAccuracyCircle = L.circle(latlng, {
-          radius: accuracy,
+          radius: showAccuracy ? accuracy : 1,
           color: "#2196f3",
           fillColor: "#2196f3",
           fillOpacity: 0.15,
           weight: 1
-        }).addTo(map);
+        });
       } else {
         currentLocationMarker.setLatLng(latlng);
         currentAccuracyCircle.setLatLng(latlng);
-        currentAccuracyCircle.setRadius(accuracy);
+
+        if (showAccuracy) {
+          currentAccuracyCircle.setRadius(accuracy);
+        }
+      }
+
+      if (showAccuracy) {
+        if (!map.hasLayer(currentAccuracyCircle)) {
+          currentAccuracyCircle.addTo(map);
+        }
+      } else if (map.hasLayer(currentAccuracyCircle)) {
+        currentAccuracyCircle.remove();
       }
 
       if (firstFix) {
@@ -3012,6 +3586,11 @@
     }
 
     function renderMarkers() {
+      /* 営業情報・履歴の画面が開いていれば、一緒に更新する */
+      if (typeof refreshBizViews === "function") {
+        refreshBizViews();
+      }
+
       markersLayer.clearLayers();
 
       getDisplayRecords()
@@ -3241,6 +3820,10 @@
         ).value = settings.pickupFee;
 
         document.getElementById(
+          "settingClosingDay"
+        ).value = String(settings.closingDay || 0);
+
+        document.getElementById(
           "settingDisplayName"
         ).value = localStorage.getItem(NAME_KEY) || "";
 
@@ -3283,6 +3866,13 @@
           10
         );
 
+        const closingDay = Number.parseInt(
+          document.getElementById(
+            "settingClosingDay"
+          ).value,
+          10
+        );
+
         const hasInvalidValue =
           !Number.isFinite(boundary1) ||
           !Number.isFinite(boundary2) ||
@@ -3290,6 +3880,7 @@
           boundary1 < 0 ||
           boundary2 < 0 ||
           pickupFee < 0 ||
+          !(closingDay >= 0 && closingDay <= 28) ||
           boundary1 >= boundary2;
 
         if (hasInvalidValue) {
@@ -3301,9 +3892,11 @@
         }
 
         settings = {
+          ...settings,
           boundary1,
           boundary2,
-          pickupFee
+          pickupFee,
+          closingDay
         };
 
         saveSettings();
@@ -3530,6 +4123,11 @@
     auth.onAuthStateChanged(async (user) => {
       authResolved = true;
 
+      /* 営業情報（勤務データ）も、ログイン中のユーザー分に切り替える */
+      if (typeof reloadShifts === "function") {
+        reloadShifts();
+      }
+
       if (user) {
         localStorage.setItem(LAST_UID_KEY, user.uid);
       } else {
@@ -3582,6 +4180,676 @@
     /* 入力途中でページが再読み込みされていたら復元する */
     restoreDraft();
   </script>
+
+  <script>
+  /*
+   * ========================================
+   * 営業情報・履歴・画面下のタブ
+   * ========================================
+   */
+  (() => {
+    const $ = (id) => document.getElementById(id);
+    const WEEK = ["日", "月", "火", "水", "木", "金", "土"];
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const yen = (n) => `¥${Math.round(n).toLocaleString()}`;
+
+    const startOfDay = (d) =>
+      new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+    const addDays = (d, n) =>
+      new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+
+    const dateKey = (d) =>
+      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    const md = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+    const hm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+    /* 月曜始まりの週 */
+    const mondayOf = (d) =>
+      addDays(startOfDay(d), -((d.getDay() + 6) % 7));
+
+    /* ---------- 勤務（営業開始〜営業終了）の保存 ---------- */
+
+    let shifts = [];
+
+    function shiftsKey() {
+      return getRecordsStorageKey().replace(
+        "taxi_records_",
+        "taxi_shifts_"
+      );
+    }
+
+    function loadShifts() {
+      try {
+        const raw = localStorage.getItem(shiftsKey());
+        const list = raw ? JSON.parse(raw) : [];
+
+        return Array.isArray(list)
+          ? list.filter((item) => item && item.start)
+          : [];
+      } catch (error) {
+        console.error("勤務データの読み込みエラー:", error);
+        return [];
+      }
+    }
+
+    function saveShifts() {
+      localStorage.setItem(shiftsKey(), JSON.stringify(shifts));
+    }
+
+    const activeShift = () =>
+      shifts.find((item) => !item.end) || null;
+
+    function lastShift() {
+      return shifts.reduce(
+        (latest, item) =>
+          !latest || Date.parse(item.start) > Date.parse(latest.start)
+            ? item
+            : latest,
+        null
+      );
+    }
+
+    /* 自分の記録だけ（金額が数値のもの） */
+    function ownRecords() {
+      return records.filter(
+        (record) =>
+          isOwnRecord(record) &&
+          record.time &&
+          Number.isFinite(Number(record.ryoukin))
+      );
+    }
+
+    /* ---------- 勤務日・締め日 ---------- */
+
+    function shiftRanges() {
+      return shifts.map((item) => ({
+        s: Date.parse(item.start),
+        e: item.end ? Date.parse(item.end) : Infinity
+      }));
+    }
+
+    /*
+     * 記録がどの日の勤務か。
+     * 営業開始〜終了の間の記録は、開始した日の勤務として数える
+     * （日をまたぐ営業でも、開始日の売上になる）。
+     * 営業の記録がない時間の記録は、記録した日で数える。
+     */
+    function workDateOf(time, ranges) {
+      for (const range of ranges) {
+        if (time >= range.s && time <= range.e) {
+          return startOfDay(new Date(range.s));
+        }
+      }
+
+      return startOfDay(new Date(time));
+    }
+
+    function buildDaily() {
+      const ranges = shiftRanges();
+      const byDay = new Map();
+
+      ownRecords().forEach((record) => {
+        const time = Date.parse(record.time);
+
+        if (!Number.isFinite(time)) {
+          return;
+        }
+
+        const date = workDateOf(time, ranges);
+        const key = dateKey(date);
+        const entry = byDay.get(key) || { date, sales: 0, count: 0 };
+
+        entry.sales += Number(record.ryoukin);
+        entry.count += 1;
+
+        byDay.set(key, entry);
+      });
+
+      return byDay;
+    }
+
+    function workToday() {
+      const active = activeShift();
+
+      return startOfDay(active ? new Date(active.start) : new Date());
+    }
+
+    function getClosing() {
+      const value = Number(settings.closingDay);
+
+      return Number.isInteger(value) && value >= 1 && value <= 28
+        ? value
+        : 0;
+    }
+
+    /*
+     * 締め日で区切った1か月（0 = 末日締め）。
+     * 例）20日締め：10/21〜11/20 が「11月20日締め」。
+     * 締め日の翌日以降に始まる勤務は、次の期間に入る。
+     */
+    function periodOf(date) {
+      const closing = getClosing();
+      const y = date.getFullYear();
+      const m = date.getMonth();
+
+      let end;
+      let start;
+
+      if (closing === 0) {
+        end = new Date(y, m + 1, 0);
+        start = new Date(y, m, 1);
+      } else {
+        end =
+          date.getDate() <= closing
+            ? new Date(y, m, closing)
+            : new Date(y, m + 1, closing);
+
+        start = addDays(
+          new Date(end.getFullYear(), end.getMonth() - 1, closing),
+          1
+        );
+      }
+
+      return {
+        start,
+        end,
+        key: `${end.getFullYear()}-${pad(end.getMonth() + 1)}`
+      };
+    }
+
+    function periodTitle(period) {
+      const y = period.end.getFullYear();
+      const m = period.end.getMonth() + 1;
+
+      return getClosing() === 0
+        ? `${y}年${m}月分`
+        : `${y}年${m}月${getClosing()}日締め`;
+    }
+
+    const periodRange = (period) =>
+      `${md(period.start)}〜${md(period.end)}`;
+
+    /* ---------- 画面（タブ）の切り替え ---------- */
+
+    let currentTab = "map";
+
+    function showTab(tab) {
+      currentTab = tab;
+
+      document.querySelectorAll(".tab-btn").forEach((button) => {
+        button.classList.toggle("active", button.dataset.tab === tab);
+      });
+
+      $("viewBiz").classList.toggle("show", tab === "biz");
+      $("viewHistory").classList.toggle("show", tab === "history");
+
+      if (tab === "map") {
+        setTimeout(() => map.invalidateSize(), 0);
+      }
+
+      refresh();
+    }
+
+    document.querySelectorAll(".tab-btn").forEach((button) => {
+      button.addEventListener("click", () => showTab(button.dataset.tab));
+    });
+
+    /* 営業情報・履歴の画面から設定を開く */
+    document.querySelectorAll("[data-open-settings]").forEach((button) => {
+      button.addEventListener("click", () => {
+        $("btnSettings").click();
+      });
+    });
+
+    /* ---------- 営業情報 ---------- */
+
+    let bizCache = null;
+
+    function formatElapsed(ms) {
+      const total = Math.max(0, Math.floor(ms / 1000));
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+
+      return `${h}:${pad(m)}:${pad(s)}`;
+    }
+
+    function hourlyText(sales, ms) {
+      if (ms < 60000) {
+        return "—";
+      }
+
+      return `${yen(sales / (ms / 3600000))}`;
+    }
+
+    function updateBizClock() {
+      if (!bizCache) {
+        return;
+      }
+
+      const end = bizCache.active ? Date.now() : bizCache.end;
+      const ms = end - bizCache.start;
+
+      $("bizElapsed").textContent = formatElapsed(ms);
+      $("bizHourly").textContent = hourlyText(bizCache.sales, ms);
+    }
+
+    function renderBiz() {
+      const active = activeShift();
+      const shown = active || lastShift();
+
+      $("btnShiftStart").disabled = !!active;
+      $("btnShiftEnd").disabled = !active;
+
+      const chip = $("bizChip");
+
+      chip.classList.toggle("on", !!active);
+      chip.textContent = active
+        ? "● 営業中"
+        : shown
+          ? "営業終了"
+          : "営業前";
+
+      if (!shown) {
+        bizCache = null;
+
+        $("bizPeriod").textContent = "「営業開始」で集計を始めます";
+        $("bizElapsed").textContent = "0:00:00";
+        $("bizSales").textContent = "¥0";
+        $("bizCount").textContent = "0";
+        $("bizHourly").textContent = "—";
+        return;
+      }
+
+      const start = Date.parse(shown.start);
+      const end = shown.end ? Date.parse(shown.end) : Infinity;
+
+      let sales = 0;
+      let count = 0;
+
+      ownRecords().forEach((record) => {
+        const time = Date.parse(record.time);
+
+        if (time >= start && time <= end) {
+          sales += Number(record.ryoukin);
+          count += 1;
+        }
+      });
+
+      bizCache = { active: !!active, start, end, sales, count };
+
+      const startDate = new Date(start);
+
+      $("bizPeriod").textContent = active
+        ? `${md(startDate)} ${hm(startDate)} 開始`
+        : `前回：${md(startDate)} ${hm(startDate)}〜${hm(new Date(end))}`;
+
+      $("bizSales").textContent = yen(sales);
+      $("bizCount").textContent = String(count);
+
+      updateBizClock();
+    }
+
+    setInterval(() => {
+      if (currentTab === "biz" && bizCache && bizCache.active) {
+        updateBizClock();
+      }
+    }, 1000);
+
+    $("btnShiftStart").addEventListener("click", () => {
+      if (activeShift()) {
+        return;
+      }
+
+      shifts.push({
+        id: Date.now().toString(36),
+        start: new Date().toISOString(),
+        end: null
+      });
+
+      saveShifts();
+      refresh();
+    });
+
+    $("btnShiftEnd").addEventListener("click", () => {
+      const active = activeShift();
+
+      if (!active) {
+        return;
+      }
+
+      if (!confirm("営業を終了しますか？")) {
+        return;
+      }
+
+      active.end = new Date().toISOString();
+
+      saveShifts();
+      refresh();
+    });
+
+    /* ---------- 履歴 ---------- */
+
+    let histMode = "week";
+    let histAnchor = null;
+    let selectedKey = null;
+
+    function niceMax(value) {
+      if (value <= 0) {
+        return 10000;
+      }
+
+      const mag = Math.pow(10, Math.floor(Math.log10(value)));
+      const norm = value / mag;
+      const nice = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
+
+      return nice * mag;
+    }
+
+    function buildChart(days) {
+      const W = 340;
+      const H = 220;
+      const left = 50;
+      const right = 8;
+      const top = 18;
+      const bottom = histMode === "week" ? 36 : 24;
+      const plotW = W - left - right;
+      const plotH = H - top - bottom;
+      const n = days.length;
+      const slot = plotW / n;
+      const barW = Math.min(slot * 0.66, 36);
+      const max = niceMax(Math.max(0, ...days.map((day) => day.sales)));
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="売上の棒グラフ">`;
+
+      for (let i = 0; i <= 4; i++) {
+        const y = top + plotH - (plotH * i) / 4;
+        const value = (max * i) / 4;
+
+        svg += `<line x1="${left}" y1="${y}" x2="${W - right}" y2="${y}" stroke="${i === 0 ? "#999" : "#e3e3e3"}" stroke-width="1"/>`;
+        svg += `<text x="${left - 6}" y="${y + 3}" font-size="9" fill="#777" text-anchor="end">${Math.round(value).toLocaleString()}</text>`;
+      }
+
+      days.forEach((day, i) => {
+        const x = left + slot * i + (slot - barW) / 2;
+        const h = (day.sales / max) * plotH;
+        const y = top + plotH - h;
+        const selected = day.key === selectedKey;
+        const dow = day.date.getDay();
+        const color = dow === 0 ? "#c62828" : dow === 6 ? "#1565c0" : "#555";
+        const cx = left + slot * i + slot / 2;
+
+        if (day.sales > 0) {
+          svg += `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="2" fill="${selected ? "#ff9800" : "#42a5f5"}"/>`;
+        }
+
+        if (histMode === "week") {
+          if (day.sales > 0) {
+            svg += `<text x="${cx}" y="${y - 4}" font-size="9" fill="#333" text-anchor="middle">${day.sales.toLocaleString()}</text>`;
+          }
+
+          svg += `<text x="${cx}" y="${top + plotH + 14}" font-size="12" font-weight="bold" fill="${color}" text-anchor="middle">${WEEK[dow]}</text>`;
+          svg += `<text x="${cx}" y="${top + plotH + 28}" font-size="10" fill="#666" text-anchor="middle">${day.date.getDate()}</text>`;
+        } else {
+          const showLabel =
+            i % 5 === 0 || i === n - 1 || day.date.getDate() === 1;
+
+          if (showLabel) {
+            const text =
+              day.date.getDate() === 1 ? md(day.date) : day.date.getDate();
+
+            svg += `<text x="${cx}" y="${top + plotH + 14}" font-size="10" fill="${color}" text-anchor="middle">${text}</text>`;
+          } else if (selected && day.sales > 0) {
+            svg += `<text x="${cx}" y="${y - 4}" font-size="9" fill="#333" text-anchor="middle">${day.sales.toLocaleString()}</text>`;
+          }
+        }
+
+        svg += `<rect x="${left + slot * i}" y="${top}" width="${slot}" height="${plotH + bottom}" fill="transparent" data-key="${day.key}"/>`;
+      });
+
+      return svg + "</svg>";
+    }
+
+    function renderHistory() {
+      const today = workToday();
+
+      if (!histAnchor) {
+        histAnchor = today;
+      }
+
+      const byDay = buildDaily();
+
+      let rangeStart;
+      let rangeEnd;
+
+      if (histMode === "week") {
+        rangeStart = mondayOf(histAnchor);
+        rangeEnd = addDays(rangeStart, 6);
+
+        $("histTitle").textContent = `${md(rangeStart)}〜${md(rangeEnd)}`;
+        $("histSub").textContent =
+          today >= rangeStart && today <= rangeEnd
+            ? "今週"
+            : `${rangeStart.getFullYear()}年`;
+      } else {
+        const period = periodOf(histAnchor);
+
+        rangeStart = period.start;
+        rangeEnd = period.end;
+
+        $("histTitle").textContent = periodTitle(period);
+        $("histSub").textContent = periodRange(period);
+      }
+
+      let earliest = null;
+
+      byDay.forEach((entry) => {
+        if (!earliest || entry.date < earliest) {
+          earliest = entry.date;
+        }
+      });
+
+      $("btnHistNext").disabled = rangeEnd >= today;
+      $("btnHistPrev").disabled = !earliest || rangeStart <= earliest;
+
+      const days = [];
+
+      for (let d = rangeStart; d <= rangeEnd; d = addDays(d, 1)) {
+        const key = dateKey(d);
+        const entry = byDay.get(key);
+
+        days.push({
+          key,
+          date: d,
+          sales: entry ? entry.sales : 0,
+          count: entry ? entry.count : 0
+        });
+      }
+
+      if (!days.some((day) => day.key === selectedKey)) {
+        selectedKey = days.some((day) => day.key === dateKey(today))
+          ? dateKey(today)
+          : null;
+      }
+
+      const total = days.reduce((sum, day) => sum + day.sales, 0);
+      const count = days.reduce((sum, day) => sum + day.count, 0);
+      const workDays = days.filter((day) => day.count > 0).length;
+
+      $("histTotal").textContent = yen(total);
+      $("histCount").textContent = `${count}回`;
+      $("histAvg").textContent = yen(workDays ? total / workDays : 0);
+
+      $("histChart").innerHTML = buildChart(days);
+
+      const picked = days.find((day) => day.key === selectedKey);
+
+      $("histCaption").textContent = picked
+        ? `${md(picked.date)}（${WEEK[picked.date.getDay()]}）　` +
+          `${yen(picked.sales)}　${picked.count}回`
+        : "棒をタップすると、その日の売上が出ます";
+
+      document.querySelectorAll("#histSeg button").forEach((button) => {
+        button.classList.toggle(
+          "selected",
+          button.dataset.mode === histMode
+        );
+      });
+
+      renderMonthList(byDay, today);
+    }
+
+    function renderMonthList(byDay, today) {
+      const periods = new Map();
+
+      byDay.forEach((entry) => {
+        const period = periodOf(entry.date);
+        const item = periods.get(period.key) || {
+          period,
+          sales: 0,
+          count: 0
+        };
+
+        item.sales += entry.sales;
+        item.count += entry.count;
+
+        periods.set(period.key, item);
+      });
+
+      const current = periodOf(today);
+
+      if (!periods.has(current.key)) {
+        periods.set(current.key, {
+          period: current,
+          sales: 0,
+          count: 0
+        });
+      }
+
+      const list = [...periods.values()]
+        .sort((a, b) => b.period.end - a.period.end)
+        .slice(0, 24);
+
+      $("monthList").innerHTML = list
+        .map((item) => {
+          const isCurrent = item.period.key === current.key;
+          const anchor = item.period.end > today ? today : item.period.end;
+
+          return `
+            <button type="button" class="month-row${isCurrent ? " current" : ""}" data-anchor="${dateKey(anchor)}">
+              <div>
+                <div class="mr-title">${periodTitle(item.period)}${isCurrent ? '<span class="mr-tag">集計中</span>' : ""}</div>
+                <div class="mr-range">${periodRange(item.period)}</div>
+              </div>
+              <div class="mr-right">
+                <div class="mr-sales">${yen(item.sales)}</div>
+                <div class="mr-sub">${item.count}回</div>
+              </div>
+            </button>`;
+        })
+        .join("");
+    }
+
+    function parseKey(key) {
+      const [y, m, d] = key.split("-").map(Number);
+
+      return new Date(y, m - 1, d);
+    }
+
+    $("histSeg").addEventListener("click", (event) => {
+      const mode = event.target.dataset && event.target.dataset.mode;
+
+      if (!mode || mode === histMode) {
+        return;
+      }
+
+      histMode = mode;
+
+      const today = workToday();
+
+      if (histAnchor > today) {
+        histAnchor = today;
+      }
+
+      renderHistory();
+    });
+
+    $("btnHistPrev").addEventListener("click", () => {
+      if (histMode === "week") {
+        histAnchor = addDays(mondayOf(histAnchor), -7);
+      } else {
+        histAnchor = addDays(periodOf(histAnchor).start, -1);
+      }
+
+      selectedKey = null;
+      renderHistory();
+    });
+
+    $("btnHistNext").addEventListener("click", () => {
+      const today = workToday();
+
+      if (histMode === "week") {
+        histAnchor = addDays(mondayOf(histAnchor), 7);
+      } else {
+        histAnchor = addDays(periodOf(histAnchor).end, 1);
+      }
+
+      if (histAnchor > today) {
+        histAnchor = today;
+      }
+
+      selectedKey = null;
+      renderHistory();
+    });
+
+    $("histChart").addEventListener("click", (event) => {
+      const key = event.target.getAttribute("data-key");
+
+      if (!key) {
+        return;
+      }
+
+      selectedKey = selectedKey === key ? null : key;
+      renderHistory();
+    });
+
+    $("monthList").addEventListener("click", (event) => {
+      const row = event.target.closest(".month-row");
+
+      if (!row) {
+        return;
+      }
+
+      histMode = "month";
+      histAnchor = parseKey(row.dataset.anchor);
+      selectedKey = null;
+
+      renderHistory();
+      $("histBody").scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    /* ---------- 更新 ---------- */
+
+    function refresh() {
+      if (currentTab === "biz") {
+        renderBiz();
+      } else if (currentTab === "history") {
+        renderHistory();
+      }
+    }
+
+    window.refreshBizViews = refresh;
+
+    window.reloadShifts = () => {
+      shifts = loadShifts();
+      refresh();
+    };
+
+    shifts = loadShifts();
+  })();
+  </script>
 </body>
 </html>
-
