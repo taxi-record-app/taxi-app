@@ -4515,6 +4515,13 @@
     const activeShift = () =>
       visibleShifts().find((item) => !item.end) || null;
 
+    /*
+     * 記録の日時は「分」までしか入力できないため、営業開始の秒を切り捨てて比べる。
+     * （開始と同じ分に記録すると、開始より前の扱いになって数えられなかったため）
+     */
+    const shiftStartMs = (item) =>
+      Math.floor(Date.parse(item.start) / 60000) * 60000;
+
     function lastShift() {
       return visibleShifts().reduce(
         (latest, item) =>
@@ -4777,7 +4784,7 @@
 
     function shiftRanges() {
       return visibleShifts().map((item) => ({
-        s: Date.parse(item.start),
+        s: shiftStartMs(item),
         e: item.end ? Date.parse(item.end) : Infinity
       }));
     }
@@ -4795,6 +4802,11 @@
         const found = ranges.find(
           (range) => rec.t >= range.s && rec.t <= range.e
         );
+
+        /* 営業中の記録は、営業終了を押すまで履歴に入れない */
+        if (found && found.e === Infinity) {
+          return;
+        }
 
         const date = startOfDay(new Date(found ? found.s : rec.t));
         const key = dateKey(date);
@@ -4960,6 +4972,10 @@
       const shiftDays = new Set();
 
       visibleShifts().forEach((item) => {
+        if (!item.end) {
+          return;
+        }
+
         const day = startOfDay(new Date(item.start));
 
         shiftDays.add(dateKey(day));
@@ -5094,7 +5110,7 @@
         return;
       }
 
-      const start = Date.parse(shown.start);
+      const start = shiftStartMs(shown);
       const end = shown.end ? Date.parse(shown.end) : Infinity;
 
       let sales = 0;
@@ -5283,6 +5299,10 @@
       });
 
       visibleShifts().forEach((item) => {
+        if (!item.end) {
+          return;
+        }
+
         const day = startOfDay(new Date(item.start));
 
         if (!earliest || day < earliest) {
@@ -5500,9 +5520,21 @@
       };
 
       const rowHtml = (item) => {
-        const start = Date.parse(item.start);
+        const start = shiftStartMs(item);
         const end = item.end ? Date.parse(item.end) : Infinity;
         const date = new Date(start);
+
+        if (!item.end) {
+          return `
+          <div class="rec-row">
+            <div class="rec-main">
+              <div class="rec-date">${mdw(date)}</div>
+              <div class="rec-time">${hm(start)} 〜</div>
+              <div class="rec-sub">営業中（営業終了後に反映されます）</div>
+            </div>
+            <button type="button" class="rec-edit" data-id="${item.id}">編集</button>
+          </div>`;
+        }
 
         let sales = 0;
         let count = 0;
