@@ -1309,6 +1309,49 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .rec-time {
+      color: #666;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rec-older-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      width: 100%;
+      margin: 4px 0 8px;
+      padding: 11px 14px;
+
+      color: #1565c0;
+      font-size: 14px;
+      font-weight: bold;
+
+      background: #e3f2fd;
+      border: none;
+      border-radius: 12px;
+
+      cursor: pointer;
+    }
+
+    .rec-older-toggle .arrow {
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+
+    .rec-older-toggle.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    #recentOlder {
+      display: none;
+    }
+
+    #recentOlder.open {
+      display: block;
+    }
+
     .rec-edit {
       padding: 7px 12px;
 
@@ -1591,7 +1634,7 @@
       </div>
 
       <div class="section-head">
-        <span class="section-title">稼働記録（直近5回）</span>
+        <span class="section-title">稼働記録</span>
         <button type="button" id="btnShiftAdd" class="small-link">＋ 勤務を追加</button>
       </div>
       <div id="recentList"></div>
@@ -5433,54 +5476,82 @@
       return `${Math.floor(total / 60)}:${pad(total % 60)}`;
     }
 
+    let recentOlderOpen = false;
+
     function renderRecent() {
       const recs = ownRecs();
 
-      const list = visibleShifts()
+      /* 日付の新しい順（上が新しい） */
+      const all = visibleShifts()
         .slice()
-        .sort((a, b) => Date.parse(b.start) - Date.parse(a.start))
-        .slice(0, 5);
+        .sort((a, b) => Date.parse(b.start) - Date.parse(a.start));
 
-      if (list.length === 0) {
+      if (all.length === 0) {
         $("recentList").innerHTML =
           '<div class="empty-note">稼働記録はまだありません。<br>' +
           "営業開始を押すか、右上の「＋ 勤務を追加」から入れられます。</div>";
         return;
       }
 
-      $("recentList").innerHTML = list
-        .map((item) => {
-          const start = Date.parse(item.start);
-          const end = item.end ? Date.parse(item.end) : Infinity;
-          const date = new Date(start);
+      const hm = (ms) => {
+        const d = new Date(ms);
 
-          let sales = 0;
-          let count = 0;
+        return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      };
 
-          recs.forEach((rec) => {
-            if (rec.t >= start && rec.t <= end) {
-              sales += rec.v;
-              count += 1;
-            }
-          });
+      const rowHtml = (item) => {
+        const start = Date.parse(item.start);
+        const end = item.end ? Date.parse(item.end) : Infinity;
+        const date = new Date(start);
 
-          const span = item.end
-            ? `拘束 ${formatSpan(end - start)}`
-            : "営業中";
+        let sales = 0;
+        let count = 0;
 
-          return `
-            <div class="rec-row">
-              <div class="rec-main">
-                <div class="rec-date">${mdw(date)}</div>
-                <div class="rec-sub">${span}　${count}回</div>
-              </div>
-              <div class="rec-right">
-                <div class="rec-sales">${yen(sales)}</div>
-              </div>
-              <button type="button" class="rec-edit" data-id="${item.id}">編集</button>
-            </div>`;
-        })
-        .join("");
+        recs.forEach((rec) => {
+          if (rec.t >= start && rec.t <= end) {
+            sales += rec.v;
+            count += 1;
+          }
+        });
+
+        const span = item.end
+          ? `拘束 ${formatSpan(end - start)}`
+          : "営業中";
+
+        const range = item.end
+          ? `${hm(start)} 〜 ${hm(end)}`
+          : `${hm(start)} 〜`;
+
+        return `
+          <div class="rec-row">
+            <div class="rec-main">
+              <div class="rec-date">${mdw(date)}</div>
+              <div class="rec-time">${range}</div>
+              <div class="rec-sub">${span}　${count}回</div>
+            </div>
+            <div class="rec-right">
+              <div class="rec-sales">${yen(sales)}</div>
+            </div>
+            <button type="button" class="rec-edit" data-id="${item.id}">編集</button>
+          </div>`;
+      };
+
+      const latest = all.slice(0, 5);
+      const older = all.slice(5);
+
+      let html = latest.map(rowHtml).join("");
+
+      if (older.length > 0) {
+        html +=
+          `<button type="button" id="btnRecentOlder" class="rec-older-toggle${recentOlderOpen ? " open" : ""}">` +
+          `<span>それ以前の記録（${older.length}件）</span>` +
+          '<span class="arrow">▼</span></button>' +
+          `<div id="recentOlder"${recentOlderOpen ? ' class="open"' : ""}>` +
+          older.map(rowHtml).join("") +
+          "</div>";
+      }
+
+      $("recentList").innerHTML = html;
     }
 
     function renderMonthList(groups, today) {
@@ -5706,6 +5777,15 @@
     $("btnShiftCancel").addEventListener("click", closeShiftModal);
 
     $("recentList").addEventListener("click", (event) => {
+      const toggle = event.target.closest("#btnRecentOlder");
+
+      if (toggle) {
+        recentOlderOpen = !recentOlderOpen;
+        toggle.classList.toggle("open", recentOlderOpen);
+        $("recentOlder").classList.toggle("open", recentOlderOpen);
+        return;
+      }
+
       const button = event.target.closest(".rec-edit");
 
       if (button) {
