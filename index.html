@@ -1303,10 +1303,22 @@
       font-size: 12px;
     }
 
+    .rec-right {
+      text-align: right;
+    }
+
     .rec-sales {
       font-size: 16px;
       font-weight: bold;
       font-variant-numeric: tabular-nums;
+    }
+
+    .tax-ex {
+      margin-top: 1px;
+      color: #999;
+      font-size: 11px;
+      font-weight: normal;
+      line-height: 1.3;
     }
 
     .rec-time {
@@ -1610,6 +1622,7 @@
       <div class="card" style="margin-top: 10px;">
         <div class="card-label" id="histTotalLabel">この月の売上合計</div>
         <div id="histTotal" class="big-value">¥0</div>
+        <div id="histTotalEx" class="tax-ex"></div>
 
         <div class="card-row" style="margin-top: 8px;">
           <div>
@@ -1619,6 +1632,7 @@
           <div>
             <div class="card-label" id="histAvgLabel">1出庫あたりの平均</div>
             <div class="mid-value small" id="histAvg">¥0</div>
+            <div class="tax-ex" id="histAvgEx"></div>
           </div>
         </div>
       </div>
@@ -1635,7 +1649,7 @@
 
       <div class="section-head">
         <span class="section-title">稼働記録</span>
-        <button type="button" id="btnShiftAdd" class="small-link">＋ 勤務を追加</button>
+        <button type="button" id="btnShiftAdd" class="small-link">＋ 記録を追加</button>
       </div>
       <div id="recentList"></div>
 
@@ -4437,6 +4451,10 @@
     const pad = (n) => String(n).padStart(2, "0");
     const yen = (n) => `¥${Math.round(n).toLocaleString()}`;
 
+    /* 税抜き表示（税込みから10%引いた金額） */
+    const exTax = (n) => `税抜 ${yen(n * 0.9)}`;
+    const exTaxHtml = (n) => `<div class="tax-ex">${exTax(n)}</div>`;
+
     const startOfDay = (d) =>
       new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
@@ -5395,7 +5413,8 @@
         const picked = days.find((day) => day.key === selectedKey);
 
         caption = picked
-          ? `${mdw(picked.date)}　${yen(picked.sales)}　乗車${picked.count}回`
+          ? `${mdw(picked.date)}　${yen(picked.sales)}　乗車${picked.count}回` +
+            exTaxHtml(picked.sales)
           : "棒をタップすると、その日の売上が下に出ます";
 
         $("histTotalLabel").textContent = "この月の売上合計";
@@ -5458,7 +5477,8 @@
 
           caption =
             `${picked.m}月分（${rangeText(range)}）　${yen(picked.sales)}` +
-            `　乗車${picked.count}回`;
+            `　乗車${picked.count}回` +
+            exTaxHtml(picked.sales);
 
           canJump = range.start <= today;
         } else {
@@ -5471,10 +5491,12 @@
       $("histTotal").textContent = yen(total);
       $("histCount").textContent = `${count}回`;
       $("histAvg").textContent = yen(outings ? total / outings : 0);
+      $("histTotalEx").textContent = exTax(total);
+      $("histAvgEx").textContent = exTax(outings ? total / outings : 0);
       $("histAvgLabel").textContent = `1出庫あたりの平均（出庫${outings}回）`;
 
       $("histChart").innerHTML = chartHtml;
-      $("histCaption").textContent = caption;
+      $("histCaption").innerHTML = caption;
       $("btnYearToMonth").style.display = canJump ? "" : "none";
 
       document.querySelectorAll("#histSeg button").forEach((button) => {
@@ -5509,7 +5531,7 @@
       if (all.length === 0) {
         $("recentList").innerHTML =
           '<div class="empty-note">稼働記録はまだありません。<br>' +
-          "営業開始を押すか、右上の「＋ 勤務を追加」から入れられます。</div>";
+          "営業開始を押すか、右上の「＋ 記録を追加」から入れられます。</div>";
         return;
       }
 
@@ -5547,7 +5569,7 @@
         });
 
         const span = item.end
-          ? `拘束 ${formatSpan(end - start)}`
+          ? `拘束時間 ${formatSpan(end - start)}`
           : "営業中";
 
         const range = item.end
@@ -5563,6 +5585,7 @@
             </div>
             <div class="rec-right">
               <div class="rec-sales">${yen(sales)}</div>
+              ${exTaxHtml(sales)}
             </div>
             <button type="button" class="rec-edit" data-id="${item.id}">編集</button>
           </div>`;
